@@ -1,4 +1,4 @@
-package com.rebootcrew.trendly;
+package com.rebootcrew.trendly.trendly;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

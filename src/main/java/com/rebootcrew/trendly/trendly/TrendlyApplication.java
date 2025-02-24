@@ -1,4 +1,4 @@
-package com.rebootcrew.trendly;
+package com.rebootcrew.trendly.trendly;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

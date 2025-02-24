@@ -1,1 +1,8 @@
 rootProject.name = 'trendly'
+include 'common'
+include 'user'
+include 'discussion'
+include 'trending'
+include 'websocket'
+include 'batch'
+

@@ -10,6 +10,9 @@ repositories {
 }
 
 dependencies {
+    dependencies {
+        implementation project(':common') // common 모듈을 의존성으로 추가
+    }
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

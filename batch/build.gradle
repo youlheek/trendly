@@ -10,6 +10,18 @@ repositories {
 }
 
 dependencies {
+    // HTTP 요청을 위한 Apache HttpClient
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+
+    implementation platform("org.seleniumhq.selenium:selenium-bom:4.17.0")
+
+    // 아래 항목들은 버전 명시 없이 써도 모두 4.17.0으로 맞춰짐
+    implementation 'org.seleniumhq.selenium:selenium-java'
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver'
+
+    // WebDriverManager 최신 버전 (5.7.0)
+    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

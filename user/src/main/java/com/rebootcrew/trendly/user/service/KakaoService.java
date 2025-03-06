@@ -1,64 +1,80 @@
 package com.rebootcrew.trendly.user.service;
 
-import com.rebootcrew.trendly.common.config.JwtTokenProvider;
-import com.rebootcrew.trendly.common.domain.User;
-import com.rebootcrew.trendly.common.respository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rebootcrew.trendly.user.domain.KakaoTokenResponse;
 import com.rebootcrew.trendly.user.domain.KakaoUserResponse;
-import com.rebootcrew.trendly.user.domain.SignUpForm;
-import com.rebootcrew.trendly.user.dto.AuthResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
 
-	private final UserRepository userRepository;
-	private final JwtTokenProvider jwtTokenProvider;
+	private final RestTemplate restTemplate;
+	private final ObjectMapper objectMapper;
 
-	// 4. 회원 정보(email) 조회
-	public boolean isEmailExist(String email) {
-		return userRepository.findByEmail(email).isPresent();
+	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+	private String kakaoClientId;
+	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
+	private String redirectUri;
+
+	private static final String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
+	private static final String USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
+
+
+	// 2. 카카오 authorization code & access token 발급 요청
+	public KakaoTokenResponse getAccessToken(String code) throws JsonProcessingException {
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("grant_type", "authorization_code");
+		params.add("client_id", kakaoClientId);
+		params.add("redirect_uri", redirectUri);
+		params.add("code", code);
+
+		// TODO : 에러처리
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+		ResponseEntity<String> response =
+				restTemplate.exchange(
+						TOKEN_URL,
+						HttpMethod.POST,
+						request,
+						String.class);
+
+		return objectMapper.readValue(response.getBody(), KakaoTokenResponse.class);
 	}
 
-	public AuthResponse loginUser(KakaoUserResponse userInfo) {
-		// TODO : 로그인 로직 구현 (토큰 발급)
-		String accessToken = jwtTokenProvider.generateAccessToken(userInfo.getKakaoAccount().getEmail());
-		String refreshToken = jwtTokenProvider.generateRefreshToken(userInfo.getKakaoAccount().getEmail());
+	// 3. 카카오로부터 회원 정보 받아오기
+	public KakaoUserResponse getUserInfo(String accessToken) {
 
-		return AuthResponse.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.user(userInfo)
-				.build();
-	}
+		// HTTP 헤더에 Bearer 토큰 추가
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(accessToken);
 
-	// 5. 회원가입 처리
-	public AuthResponse signUpUser(KakaoUserResponse userInfo){
-		// TODO : 에러나면 rollback -> DB 저장 X
-		SignUpForm form = SignUpForm.from(userInfo);
-		User user = userRepository.save(form.toUser());
-		System.out.println("회원가입이 완료되었습니다.");
+		// HTTP 요청 생성
+		HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-		// access token 발급 & refreshToken
-		String accessToken = jwtTokenProvider.generateAccessToken(userInfo.getKakaoAccount().getEmail());
-		String refreshToken = jwtTokenProvider.generateRefreshToken(userInfo.getKakaoAccount().getEmail());
+		// 사용자 정보 조회 API 호출 (응답을 String으로 받은 후 DTO로 변환)
+		ResponseEntity<String> responseEntity =
+				restTemplate.exchange(
+						USER_INFO_URL,
+						HttpMethod.GET,
+						requestEntity,
+						String.class);
 
-		return AuthResponse.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.user(userInfo)
-				.build();
-	}
-
-	/**
-	 * 내부 토큰 무효화 처리
-	 * 실제 구현에서는 데이터베이스, 캐시(Redis) 또는 블랙리스트 등록 등을 수행
-	 * @param token 클라이언트가 보유한 우리 시스템의 토큰
-	 */
-	public void invalidateTokens(String token) {
-		// 예시: 토큰 만료 또는 삭제 처리 로직
-		System.out.println("내부 토큰 만료 처리: " + token);
-		// TODO: 실제 토큰 저장소에서 해당 토큰을 만료시키는 로직 구현
+		try {
+//			return responseEntity.getBody();
+			return objectMapper.readValue(responseEntity.getBody(), KakaoUserResponse.class);
+		} catch (Exception e) {
+			throw new RuntimeException("카카오 사용자 정보 조회에 실패했습니다.");
+		}
 	}
 }

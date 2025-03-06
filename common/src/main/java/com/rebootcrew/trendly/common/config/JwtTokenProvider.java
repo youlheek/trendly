@@ -23,12 +23,14 @@ public class JwtTokenProvider {
 	// access token 유효시간
 	@Value("${jwt.access-token.expiration}")
 	private Long accessTokenExpiration;
-	// 1000L * 60 * 30 * 1; 30분
+	// 운영서버 (30분) 1000L * 60 * 30 * 1
+	// 개발서버 (30초) 1000L * 30
 
 	// refresh token 유효시간
 	@Value("${jwt.refresh-token.expiration}")
 	private Long refreshTokenExpiration;
-	// 1000L * 60 * 60 * 24; 24시간
+	// 운영서버 (24시간) 1000L * 60 * 60 * 24
+	// 개발서버 (1분) 1000L * 60
 
 	// access token 생성
 	public String generateAccessToken(String email) {
@@ -40,7 +42,7 @@ public class JwtTokenProvider {
 		return generateToken(email, refreshTokenExpiration);
 	}
 
-	// 토큰 생성 로직
+	// 공통 토큰 생성 로직
 	private String generateToken(String email, Long expirationTime){
 		Claims claims = Jwts.claims()
 				.setSubject(email);
@@ -62,9 +64,15 @@ public class JwtTokenProvider {
 			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
 			return true;
 		} catch (Exception e) {
+			// TODO : Exceptions 처리
 			// 토큰이 만료되었거나, 서명이 올바르지 않거나, 기타 문제가 있는 경우 false 반환
 			return false;
 		}
+	}
+
+	// 토큰 만료시간 가져오기
+	public long getExpiration(String token) {
+		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getExpiration().getTime();
 	}
 
 	// Spring Security에 등록할 Authentication 객체 생성
@@ -74,4 +82,5 @@ public class JwtTokenProvider {
 		UserDetails userDetails = new User(claims.getSubject(),"", Collections.emptyList());
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
+
 }

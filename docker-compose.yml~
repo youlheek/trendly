@@ -1,0 +1,108 @@
+version: '3.8'  # 도커 컴포즈 버전 명시 (최신화 및 호환성 보장)
+
+services:
+  spring-boot-app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/trendly-db  # MySQL URL
+      SPRING_DATASOURCE_USERNAME: "${PUBLIC_NAME}"  # MySQL 사용자 이름
+      SPRING_DATASOURCE_PASSWORD: "${PUBLIC_PASSWORD}"  # MySQL 비밀번호
+      SPRING_RABBITMQ_HOST: "rabbitmq"  # RabbitMQ 호스트
+      SPRING_DATA_MONGODB_URI: "mongodb://mongodb:27017/advertise-db"  # MongoDB URL
+    ports:
+      - "${SPRING_PORT}:${SPRING_PORT}"  # Spring Boot 서버 포트를 외부에 노출
+    depends_on:
+      mysql-db:
+        condition: service_healthy  # MySQL이 정상 실행된 후 Spring Boot 실행
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+
+  mysql-db:
+    image: mysql:8.0
+    restart: always
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
+    volumes:
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf  # 로컬 my.cnf 파일을 MySQL 설정 파일로 사용
+      - db_data:/var/lib/mysql  # 데이터 저장을 위한 볼륨 연결
+    networks:
+      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
+    container_name: elasticsearch
+    ports:
+      - "${ES_PORT}:${ES_PORT}"
+      - "${CLUSTER_ES_PORT}:${CLUSTER_ES_PORT}"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      ELASTIC_USERNAME: "${PUBLIC_NAME}"  # 환경 변수 설정 필요
+      ELASTIC_PASSWORD: "${PUBLIC_PASSWORD}"
+      xpack.security.enabled: false
+      xpack.security.enrollment.enabled: false
+    networks:
+      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+    expose:
+      - "${ES_PORT}" ## - 외부 접속 시 REST API 호출을 위한 포트
+      - "${CLUSTER_ES_PORT}" ## - 클러스터 통신용 포트.
+
+  redis:
+    image: redis:7
+    container_name: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"  # RabbitMQ 서버 포트
+      - "${RABBITMQ_MANAGEMENT_PORT}:${RABBITMQ_MANAGEMENT_PORT}"  # 관리 콘솔 포트
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}  # 기본 사용자 이름
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}  # 기본 사용자 비밀번호
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb-server
+    ports:
+      - "${MONGODB_PORT}:${MONGODB_PORT}"
+    volumes:
+      - mongo_data:/data/db   # 데이터 저장을 위한 볼륨 연결
+    networks:
+      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+
+volumes:
+  db_data:  # MySQL 데이터
+  es-data:  # Elasticsearch 데이터
+  mongo_data:  # MongoDB 데이터
+  redis-data:  # Redis 데이터
+  rabbitmq_data:  # RabbitMQ 데이터
+
+networks:
+  app-network:
+    driver: bridge

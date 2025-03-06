@@ -20,7 +20,9 @@ dependencies {
     implementation project(':trending')
     implementation project(':batch')
 
-implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'  // JUnit 플랫폼 실행기
 }
 
 
@@ -67,6 +69,24 @@ subprojects {
 
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
+
+        // HikariCP는 경량화된 고성능 JDBC 커넥션 풀
+        implementation 'com.zaxxer:HikariCP:5.0.1'
+
+        // WebFlux를 사용한 비동기, 반응형 웹 애플리케이션 개발 지원 (Elastic Search와의 통합을 위해 사용)
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+        // Redis 데이터베이스 지원 (Redis를 통한 캐시, 데이터 저장 등에 사용)
+        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+        // MongoDB 데이터베이스 지원 (MongoDB와의 통합 및 데이터 처리)
+        implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+        // Spring Batch를 사용하여 대량의 데이터 처리를 위한 배치 처리 기능 제공
+        implementation 'org.springframework.boot:spring-boot-starter-batch'
+
+        //amqp rabbitmq message기능을 위한
+        implementation("org.springframework.boot:spring-boot-starter-amqp")
 
         runtimeOnly 'com.mysql:mysql-connector-j'
         annotationProcessor 'org.projectlombok:lombok'

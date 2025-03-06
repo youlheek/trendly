@@ -10,7 +10,7 @@ services:
       SPRING_DATASOURCE_USERNAME: "${PUBLIC_NAME}"  # MySQL 사용자 이름
       SPRING_DATASOURCE_PASSWORD: "${PUBLIC_PASSWORD}"  # MySQL 비밀번호
       SPRING_RABBITMQ_HOST: "rabbitmq"  # RabbitMQ 호스트
-      SPRING_DATA_MONGODB_URI: "mongodb://mongodb:27017/advertise-db"  # MongoDB URL
+#      SPRING_DATA_MONGODB_URI: "mongodb://mongodb:27017/advertise-db"  # MongoDB URL
     ports:
       - "${SPRING_PORT}:${SPRING_PORT}"  # Spring Boot 서버 포트를 외부에 노출
     depends_on:
@@ -86,20 +86,20 @@ services:
     networks:
       - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
 
-  mongodb:
-    image: mongo:7
-    container_name: mongodb-server
-    ports:
-      - "${MONGODB_PORT}:${MONGODB_PORT}"
-    volumes:
-      - mongo_data:/data/db   # 데이터 저장을 위한 볼륨 연결
-    networks:
-      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+#  mongodb:
+#    image: mongo:7
+#    container_name: mongodb-server
+#    ports:
+#      - "${MONGODB_PORT}:${MONGODB_PORT}"
+#    volumes:
+#      - mongo_data:/data/db   # 데이터 저장을 위한 볼륨 연결
+#    networks:
+#      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
 
 volumes:
   db_data:  # MySQL 데이터
   es-data:  # Elasticsearch 데이터
-  mongo_data:  # MongoDB 데이터
+#  mongo_data:  # MongoDB 데이터
   redis-data:  # Redis 데이터
   rabbitmq_data:  # RabbitMQ 데이터
 

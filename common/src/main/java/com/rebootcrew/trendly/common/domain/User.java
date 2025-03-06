@@ -26,4 +26,6 @@ public class User extends BaseEntity {
 	private LocalDateTime birthDate;
 	private String gender;
 
+
+
 }

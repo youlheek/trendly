@@ -12,6 +12,19 @@ allprojects {
     }
 }
 
+dependencies {
+    implementation project(':common')
+    implementation project(':user')
+    implementation project(':discussion')
+    implementation project(':websocket')
+    implementation project(':trending')
+    implementation project(':batch')
+
+implementation 'org.springframework.boot:spring-boot-starter'
+}
+
+
+
 subprojects {
     // 모든 하위 프로젝트에 다음 플러그인을 공통 적용
     apply plugin: 'java'
@@ -32,6 +45,7 @@ subprojects {
     }
 
     dependencies {
+
         implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'

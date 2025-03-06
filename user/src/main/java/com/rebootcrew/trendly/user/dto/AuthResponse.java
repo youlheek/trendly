@@ -1,6 +1,5 @@
 package com.rebootcrew.trendly.user.dto;
 
-import com.rebootcrew.trendly.user.domain.KakaoUserResponse;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,5 +8,11 @@ import lombok.Data;
 public class AuthResponse {
 	private String accessToken;
 	private String refreshToken;
-	private KakaoUserResponse user;
+
+	private Long accessTokenExpiresIn;  // ✅ 액세스 토큰 만료 시간 추가
+	private Long refreshTokenExpiresIn; // ✅ 리프레시 토큰 만료 시간 추가
+
+	private String tokenType; // "Bearer"
+
+	private UserDto user;
 }

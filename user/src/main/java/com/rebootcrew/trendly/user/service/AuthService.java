@@ -57,8 +57,9 @@ public class AuthService {
 	 * @return AuthResponse (JWT 포함)
 	 */
 	private AuthResponse generateAuthResponse(User user) {
-		String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
-		String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
+		// TODO : 토큰에 이메일 -> 회원아이디 를 담는 것으로 변경
+		String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
+		String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 		Long accessTokenExpiresIn = jwtTokenProvider.getExpiration(accessToken);
 		Long refreshTokenExpiresIn = jwtTokenProvider.getExpiration(refreshToken);
 

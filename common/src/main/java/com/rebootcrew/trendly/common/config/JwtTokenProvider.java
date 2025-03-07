@@ -33,19 +33,19 @@ public class JwtTokenProvider {
 	// 개발서버 (1분) 1000L * 60
 
 	// access token 생성
-	public String generateAccessToken(String email) {
-		return generateToken(email, accessTokenExpiration);
+	public String generateAccessToken(Long userId) {
+		return generateToken(userId, accessTokenExpiration);
 	}
 
 	// refresh token 생성
-	public String generateRefreshToken(String email) {
-		return generateToken(email, refreshTokenExpiration);
+	public String generateRefreshToken(Long userId) {
+		return generateToken(userId, refreshTokenExpiration);
 	}
 
 	// 공통 토큰 생성 로직
-	private String generateToken(String email, Long expirationTime){
+	private String generateToken(Long userId, Long expirationTime){
 		Claims claims = Jwts.claims()
-				.setSubject(email);
+				.setId(String.valueOf(userId));
 
 		Date now = new Date();
 

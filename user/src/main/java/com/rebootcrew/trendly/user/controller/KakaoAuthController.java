@@ -5,7 +5,7 @@ import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.common.exception.UnauthorizedException;
 import com.rebootcrew.trendly.user.application.AuthApplication;
 import com.rebootcrew.trendly.user.application.KakaoAuthApplication;
-import com.rebootcrew.trendly.user.dto.AuthResponse;
+import com.rebootcrew.trendly.user.domain.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,6 @@ public class KakaoAuthController {
 	// ✅ 카카오 콜백 처리 (인가 코드 -> 토큰, 사용자 정보 조회 -> 로그인/회원가입)
 	@GetMapping("/callback")
 	public ResponseEntity<AuthResponse> kakaoCallback(
-	// TODO : AuthResponse 객체 변경됨에 따라 API 명세 수정
 			@RequestParam("code") String code) throws IOException {
 
 		return ResponseEntity.ok(kakaoAuthApplication.handleKakaoCallback(code));
@@ -43,7 +42,7 @@ public class KakaoAuthController {
 		String token = authHeader.replace("Bearer ", "").trim();
 
 		if (token == null) {
-			throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
 		}
 
 		// 로그아웃

@@ -7,12 +7,13 @@ import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.common.respository.UserRepository;
 import com.rebootcrew.trendly.user.domain.KakaoUserResponse;
 import com.rebootcrew.trendly.user.domain.SignUpForm;
-import com.rebootcrew.trendly.user.dto.AuthResponse;
-import com.rebootcrew.trendly.user.dto.UserDto;
+import com.rebootcrew.trendly.user.domain.AuthResponse;
+import com.rebootcrew.trendly.user.domain.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,8 @@ public class AuthService {
 
 	private final UserRepository userRepository;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final StringRedisTemplate redisTemplate;
+//	private final StringRedisTemplate redisTemplate;
+	private final RedisTemplate redisTemplate;
 
 	private static final String BLACKLIST_PREFIX = "blacklist:";
 
@@ -57,7 +59,6 @@ public class AuthService {
 	 * @return AuthResponse (JWT 포함)
 	 */
 	private AuthResponse generateAuthResponse(User user) {
-		// TODO : 토큰에 이메일 -> 회원아이디 를 담는 것으로 변경
 		String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
 		String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 		Long accessTokenExpiresIn = jwtTokenProvider.getExpiration(accessToken);

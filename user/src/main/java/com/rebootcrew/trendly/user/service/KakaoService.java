@@ -69,6 +69,7 @@ public class KakaoService {
 						HttpMethod.GET,
 						requestEntity,
 						String.class);
+		System.out.println(responseEntity);
 
 		try {
 //			return responseEntity.getBody();

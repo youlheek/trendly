@@ -1,4 +1,4 @@
-package com.rebootcrew.trendly.user.dto;
+package com.rebootcrew.trendly.user.domain;
 
 import lombok.Builder;
 import lombok.Data;

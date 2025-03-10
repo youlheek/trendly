@@ -3,16 +3,17 @@ package com.rebootcrew.trendly.controller;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
 import com.rebootcrew.trendly.domain.enums.Platform;
 import com.rebootcrew.trendly.application.service.TrendingService;
-import com.rebootcrew.trendly.domain.enums.RankingPeriod;
 import lombok.RequiredArgsConstructor;
 import com.rebootcrew.trendly.application.dto.KeywordResponseDto;
 import com.rebootcrew.trendly.application.dto.KeywordRankingListResponseDto;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/trending")
@@ -23,8 +24,9 @@ public class TrendingController {
 
     /**키워드 전체 조회 (필터 포함) */
     @GetMapping("/keywords")
-    public ResponseEntity<List<KeywordResponseDto>> getAllKeywords() {
-        return ResponseEntity.ok(trendingService.getAllKeywords());
+    public CompletableFuture<ResponseEntity<List<KeywordResponseDto>>> getAllKeywords() {
+        return trendingService.getAllKeywords()
+                .thenApply(ResponseEntity::ok);
     }
 
     /**특정 플랫폼별 키워드 필터링 */
@@ -81,15 +83,16 @@ public class TrendingController {
 
     /** 키워드 검색 */
     @GetMapping("/keywords/search")
-    public ResponseEntity<List<KeywordResponseDto>> searchKeywords(
+    public CompletableFuture<ResponseEntity<KeywordResponseDto>> searchKeywords(
             @RequestParam String keyword,
             @RequestParam(required = false) KeywordCategory category) {
-        return ResponseEntity.ok(trendingService.searchKeywords(keyword));
+        return trendingService.searchKeyword(keyword)
+                .thenApply(ResponseEntity::ok); // 비동기 응답 처리
     }
 
-    /** 키워드와 관련된 채팅방 조회 */
-    @GetMapping("/keywords/chat/{keywordId}")
-    public ResponseEntity<ChatRoomResponse> getChatRoomByKeyword(@PathVariable Long keywordId) {
-        return ResponseEntity.ok(trendingService.getChatRoomByKeyword(keywordId));
-    }
+//    /** 키워드와 관련된 채팅방 조회 */
+//    @GetMapping("/keywords/chat/{keywordId}")
+//    public ResponseEntity<ChatRoomResponse> getChatRoomByKeyword(@PathVariable Long keywordId) {
+//        return ResponseEntity.ok(trendingService.getChatRoomByKeyword(keywordId));
+//    }
 }

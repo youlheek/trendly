@@ -70,10 +70,8 @@ public class TrendingService {
     /** 비동기 키워드 검색 */
     @Async
     public CompletableFuture<KeywordResponseDto> searchKeyword(String keyword) {
-        return keywordRepository.findByKeywordName(keyword) // 비동기 데이터 조회
-                .thenApply(optionalKeyword -> optionalKeyword
-                        .map(TrendingMapper::toKeywordResponseDto) // DTO 변환
-                        .orElseThrow(() -> new RuntimeException("Keyword not found: " + keyword))); // 예외 처리
+        keywordRepository.findByKeywordName(keyword);
+        return TrendingMapper::toKeywordResponseDto();
     }
 
 }

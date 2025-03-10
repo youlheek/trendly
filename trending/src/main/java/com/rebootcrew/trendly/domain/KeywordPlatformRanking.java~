@@ -32,8 +32,8 @@ public class KeywordPlatformRanking extends BaseEntity {
 
     @Column(name = "previous_rank")
     private Integer previousRank;
-    
-    // created_at을 오버라이드하여 DB에서 제외 (중요!)
+
+    // created_at을 오버라이드하여 DB에서 제외
     @Override
     public LocalDateTime getCreatedAt() {
         return null;  //  Hibernate가 필드를 무시하도록 설정

@@ -24,7 +24,7 @@ public class KeywordPlatformRanking extends BaseEntity {
     @JoinColumn(name = "keyword_platform_id", nullable = false)
     private KeywordPlatform keywordPlatform;
 
-    @Column(name = "platform_keyword_id", nullable = false)
+    @Column(name = "keyword_platform_id", nullable = false)
     private Long platformKeywordId;
 
     @Column(name = "rank", nullable = false)

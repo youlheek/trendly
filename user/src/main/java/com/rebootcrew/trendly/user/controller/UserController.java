@@ -1,32 +1,82 @@
 package com.rebootcrew.trendly.user.controller;
 
-import com.rebootcrew.trendly.user.dto.UserResponse;
+import com.rebootcrew.trendly.common.exception.ErrorCode;
+import com.rebootcrew.trendly.common.exception.UnauthorizedException;
+import com.rebootcrew.trendly.user.application.UserApplication;
+import com.rebootcrew.trendly.common.domain.UserForm;
+import com.rebootcrew.trendly.user.domain.UserResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth/user")
 @RequiredArgsConstructor
 public class UserController {
+	// 회원 관리 컨트롤러
 
+	private final UserApplication userApplication;
 
-//	@GetMapping("/me") // JWT 필요 ✅
-//	public ResponseEntity<UserResponse> getMyInfo(@RequestHeader("Authorization") String token) {
-//		return ResponseEntity.ok(userApplication.getMyInfo(token));
-//	}
-//
-//	@PatchMapping("/update") // JWT 필요 ✅
-//	public ResponseEntity<UserResponse> updateUser(
-//			@RequestHeader("Authorization") String token,
-//			@RequestBody UpdateUserRequest request
-//	) {
-//		return ResponseEntity.ok(userApplication.updateUser(token, request));
-//	}
-//
-//	@DeleteMapping("/delete") // JWT 필요 ✅
-//	public ResponseEntity<Void> deleteUser(@RequestHeader("Authorization") String token) {
-//		userApplication.deleteUser(token);
-//		return ResponseEntity.ok().build();
-//	}
+	@GetMapping("/me") // JWT 필요 ✅
+	public ResponseEntity<UserResponse> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
+
+		// 인증된 사용자가 없으면 예외 발생
+		if (userDetails == null || userDetails.getUsername() == null) {
+			throw new UnauthorizedException(ErrorCode.NOT_FOUND_USER);
+		}
+
+		// TODO : Custom 에러 처리
+		try {
+			Long userId = (long) Integer.parseInt(userDetails.getUsername());
+			UserResponse response = UserResponse.fromDto(userApplication.getMyInfo(userId));
+			return ResponseEntity.ok(response);
+//			return ResponseEntity.ok(UserResponse.fromDto(userApplication.getMyInfo(userId)));
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("유효하지 않은 사용자 ID 입니다.", e);
+		}
+
+	}
+
+	@PatchMapping("/update") // JWT 필요 ✅
+	public ResponseEntity<UserResponse> updateUser(
+			@AuthenticationPrincipal UserDetails userDetails,
+			@RequestBody @Valid UserForm request) { // @Valid 로 유효성 검사를 수행
+
+		if (userDetails == null || userDetails.getUsername() == null) {
+			throw new UnauthorizedException(ErrorCode.NOT_FOUND_USER);
+		}
+
+		try {
+			Long userId = Long.parseLong(userDetails.getUsername());
+			return ResponseEntity.ok(UserResponse.fromDto(userApplication.updateUser(userId, request)));
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("유효하지 않은 사용자 ID 입니다.", e);
+		}
+	}
+
+	@DeleteMapping("/delete") // JWT 필요 ✅
+	public ResponseEntity<String> deleteUser(HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+		String token = request.getHeader("Authorization");
+		if (token != null && token.startsWith("Bearer ")) {
+			token = token.substring(7);
+		} else {
+			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+		}
+
+		if (userDetails == null || userDetails.getUsername() == null) {
+			throw new UnauthorizedException(ErrorCode.NOT_FOUND_USER);
+		}
+
+		try {
+			Long userId = (long) Integer.parseInt(userDetails.getUsername());
+			return ResponseEntity.ok(userApplication.deleteUser(userId, token));
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("유효하지 않은 사용자 ID 입니다.", e);
+
+		}
+	}
 }

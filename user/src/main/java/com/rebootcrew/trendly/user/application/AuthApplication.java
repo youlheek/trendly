@@ -20,7 +20,7 @@ public class AuthApplication {
 	// Jwt 기반 로그아웃 처리
 	public void logout(String token) {
 		if (authService.isInvalidatedToken(token)) {
-			throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
 		}
 
 		long expiration = jwtTokenProvider.getExpiration(token);

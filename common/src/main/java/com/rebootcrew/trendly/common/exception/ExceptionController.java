@@ -1,12 +1,12 @@
 package com.rebootcrew.trendly.common.exception;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.rebootcrew.trendly.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -34,6 +34,22 @@ public class ExceptionController {
 				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI()));
 	}
 
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleValidationExceptions(
+			final MethodArgumentNotValidException ex, HttpServletRequest request) {
+		log.error("MethodArgumentNotValidException 발생: {}", ex.getMessage());
+		return ResponseEntity.status(ErrorCode.INVALID_INPUT.getHttpStatus())
+				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI()));
+	}
+
+	@ExceptionHandler(JsonParseException.class)
+	public ResponseEntity<ErrorResponse> handleJsonParseException(
+			JsonParseException ex, HttpServletRequest request) {
+		log.error("JsonParseException 발생: {}", ex.getMessage());
+		return ResponseEntity.status(ErrorCode.INVALID_JSON_FORMAT.getHttpStatus())
+				.body(ErrorResponse.of(ErrorCode.INVALID_JSON_FORMAT, request.getRequestURI()));
+	}
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleException(
 			final Exception ex, HttpServletRequest request) {
@@ -48,11 +64,4 @@ public class ExceptionController {
 						.build());
 	}
 
-	@Getter
-	@ToString
-	@AllArgsConstructor
-	public static class ExceptionResponse {
-		private ErrorCode errorCode;
-		private String message;
-	}
 }

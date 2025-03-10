@@ -2,8 +2,13 @@ package com.rebootcrew.trendly.common.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.AuditOverride;
+import org.hibernate.type.StandardBasicTypes;
 
+import javax.lang.model.util.Types;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,9 +28,21 @@ public class User extends BaseEntity {
 	private String password;
 
 	@Column(name = "birth_date")
-	private LocalDateTime birthDate;
+	private LocalDate birthDate;
 	private String gender;
 
+	@Column(name = "marketing_opt")
+	private boolean marketingOpt; // 마케팅 정보 동의
+
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
 
 
+	public static User from (UserForm form) {
+		return User.builder()
+				.birthDate(form.getBirthDate())
+				.gender(form.getGender())
+				.marketingOpt(form.isMarketingOpt())
+				.build();
+	}
 }

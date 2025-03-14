@@ -55,8 +55,6 @@ public class KakaoAuthController {
 		return ResponseEntity.ok(kakaoAuthApplication.handleKakaoCallback(code, redirectUrl));
 	}
 
-	// TODO : 추후에 AuthController 생성시 이동
-	// TODO : RequestHeader 대신에 @AuthenticationPrincipal 쓰기
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
 		String token = authHeader.replace("Bearer ", "").trim();

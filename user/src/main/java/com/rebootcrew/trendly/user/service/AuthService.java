@@ -4,6 +4,7 @@ import com.rebootcrew.trendly.common.config.JwtTokenProvider;
 import com.rebootcrew.trendly.common.domain.User;
 import com.rebootcrew.trendly.common.exception.CustomException;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
+import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.common.respository.UserRepository;
 import com.rebootcrew.trendly.user.domain.KakaoUserResponse;
 import com.rebootcrew.trendly.user.domain.SignUpForm;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +40,7 @@ public class AuthService {
 		// jwt 토큰을 발급해야함
 		// 그리고 User 객체를 돌려줌
 
-		return generateAuthResponse(user);
+		return generateAuthResponse(user, false);
 	}
 
 	// 회원가입 처리
@@ -50,7 +50,7 @@ public class AuthService {
 		User user = userRepository.save(form.toUser());
 		System.out.println("회원가입이 완료되었습니다.");
 
-		return generateAuthResponse(user);
+		return generateAuthResponse(user, true);
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class AuthService {
 	 * @param user 저장된 사용자 정보
 	 * @return AuthResponse (JWT 포함)
 	 */
-	private AuthResponse generateAuthResponse(User user) {
+	private AuthResponse generateAuthResponse(User user, boolean isNewUser) {
 		String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
 		String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 		Long accessTokenExpiresIn = jwtTokenProvider.getExpiration(accessToken);
@@ -70,6 +70,7 @@ public class AuthService {
 				.accessTokenExpiresIn(accessTokenExpiresIn)
 				.refreshTokenExpiresIn(refreshTokenExpiresIn)
 				.tokenType("Bearer")
+				.isNewUser(isNewUser)
 				.user(UserDto.fromEntity(user))
 				.build();
 	}
@@ -93,7 +94,7 @@ public class AuthService {
 			redisTemplate.opsForValue().set(BLACKLIST_PREFIX + token, "true");
 		} catch (RedisConnectionFailureException | RedisSystemException e) {
 			log.error("❌ Redis 오류 - 블랙리스트 추가 실패: {}", e.getMessage());
-			throw new CustomException(ErrorCode.JWT_BLACKLIST_FAIL);
+			throw new JwtAuthenticationException(ErrorCode.JWT_BLACKLIST_FAIL);
 		}
 
 		System.out.println("내부 토큰 만료 처리: " + token);

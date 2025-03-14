@@ -20,11 +20,13 @@ public class User extends BaseEntity {
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
+
+	@Column(name = "kakao_user_id")
+	private Long kakaoUserId;
 
 	@Column(unique = true, nullable = false)
 	private String email;
-	private String nickname;
 	private String password;
 
 	@Column(name = "birth_date")

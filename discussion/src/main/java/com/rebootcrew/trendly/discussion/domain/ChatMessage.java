@@ -33,7 +33,9 @@ public class ChatMessage {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
 
-	@OneToMany(mappedBy = "chatMessage")
+	@OneToMany(mappedBy = "message")
 	private List<ChatComment> comments = new ArrayList<>();
 }

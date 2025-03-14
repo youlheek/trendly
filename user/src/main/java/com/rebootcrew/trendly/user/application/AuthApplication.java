@@ -2,7 +2,7 @@ package com.rebootcrew.trendly.user.application;
 
 import com.rebootcrew.trendly.common.config.JwtTokenProvider;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
-import com.rebootcrew.trendly.common.exception.UnauthorizedException;
+import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class AuthApplication {
 	// Jwt 기반 로그아웃 처리
 	public void logout(String token) {
 		if (authService.isInvalidatedToken(token)) {
-			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+			throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN);
 		}
 
 		long expiration = jwtTokenProvider.getExpiration(token);

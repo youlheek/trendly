@@ -2,45 +2,52 @@ version: '3.8'  # 도커 컴포즈 버전 명시 (최신화 및 호환성 보장
 
 services:
   spring-boot-app:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+    image: youlhee/trendly:redis
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/trendly-db  # MySQL URL
+      SPRING_DATASOURCE_URL: jdbc:mysql://trendly-mysql:3306/trendly  # MySQL URL
       SPRING_DATASOURCE_USERNAME: "${PUBLIC_NAME}"  # MySQL 사용자 이름
       SPRING_DATASOURCE_PASSWORD: "${PUBLIC_PASSWORD}"  # MySQL 비밀번호
       SPRING_RABBITMQ_HOST: "rabbitmq"  # RabbitMQ 호스트
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
 #      SPRING_DATA_MONGODB_URI: "mongodb://mongodb:27017/advertise-db"  # MongoDB URL
     ports:
       - "${SPRING_PORT}:${SPRING_PORT}"  # Spring Boot 서버 포트를 외부에 노출
     depends_on:
-      mysql-db:
-        condition: service_healthy  # MySQL이 정상 실행된 후 Spring Boot 실행
-      mongodb:
-        condition: service_started
-      redis:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
+      - redis
+#      mysql-db:
+#        condition: service_healthy  # MySQL이 정상 실행된 후 Spring Boot 실행
+#      mongodb:
+#        condition: service_started
+#      redis:
+#        condition: service_started
+#      rabbitmq:
+#        condition: service_started
     networks:
-      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
 
-  mysql-db:
-    image: mysql:8.0
-    restart: always
-    platform: linux/amd64
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DB_NAME}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "${MYSQL_PORT}:${MYSQL_PORT}"
-    volumes:
-      - ./my.cnf:/etc/mysql/conf.d/my.cnf  # 로컬 my.cnf 파일을 MySQL 설정 파일로 사용
-      - db_data:/var/lib/mysql  # 데이터 저장을 위한 볼륨 연결
-    networks:
-      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+# ※ 기존에 docker-compose.yml 내에서 MySQL 서비스를 정의한 부분을 제거합니다.
+#  mysql-db:
+#    image: mysql:8.0
+
+#    container_name: trendly-mysql
+#    restart: always
+#    platform: linux/amd64
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+#      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+#      MYSQL_USER: ${MYSQL_USER}
+#      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#    ports:
+#      - "${MYSQL_PORT}:${MYSQL_PORT}"
+#    volumes:
+#      - ./my.cnf:/etc/mysql/conf.d/my.cnf  # 로컬 my.cnf 파일을 MySQL 설정 파일로 사용
+#      - db_data:/var/lib/mysql  # 데이터 저장을 위한 볼륨 연결
+#    networks:
+#      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
@@ -57,20 +64,24 @@ services:
       xpack.security.enabled: false
       xpack.security.enrollment.enabled: false
     networks:
-      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
     expose:
       - "${ES_PORT}" ## - 외부 접속 시 REST API 호출을 위한 포트
       - "${CLUSTER_ES_PORT}" ## - 클러스터 통신용 포트.
 
   redis:
     image: redis:7
-    container_name: redis-server
+    container_name: redis
+    hostname: redis
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "6379:6379"
+#      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     volumes:
       - redis-data:/data
     networks:
-      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+    restart: always
+    command: redis-server --requirepass mypassword --port 6379
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -84,7 +95,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - app-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
 
 #  mongodb:
 #    image: mongo:7
@@ -104,5 +115,7 @@ volumes:
   rabbitmq_data:  # RabbitMQ 데이터
 
 networks:
-  app-network:
+  trendly-network:
+    external: true  # 수정됨: 이미 외부에 생성된 네트워크(trendly-network)를 사용
+    name: trendly-network
     driver: bridge

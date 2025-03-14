@@ -2,6 +2,7 @@ package com.rebootcrew.trendly.common.config;
 
 import com.rebootcrew.trendly.common.exception.CustomException;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
+import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -44,6 +45,8 @@ public class JwtTokenProvider {
 
 	private final RedisTemplate redisTemplate;
 	private static final String BLACKLIST_PREFIX = "blacklist:";
+	private static final String TOKEN_TYPE_REFRESH = "refresh";
+	private static final String TOKEN_TYPE_ACCESS = "access";
 
 	public JwtTokenProvider(RedisTemplate redisTemplate) {
 		this.redisTemplate = redisTemplate;
@@ -52,16 +55,16 @@ public class JwtTokenProvider {
 
 	// access token 생성
 	public String generateAccessToken(Long userId) {
-		return generateToken(userId, accessTokenExpiration);
+		return generateToken(userId, accessTokenExpiration, TOKEN_TYPE_ACCESS);
 	}
 
 	// refresh token 생성
 	public String generateRefreshToken(Long userId) {
-		return generateToken(userId, refreshTokenExpiration);
+		return generateToken(userId, refreshTokenExpiration, TOKEN_TYPE_REFRESH);
 	}
 
 	// 공통 토큰 생성 로직
-	private String generateToken(Long userId, Long expirationTime) {
+	private String generateToken(Long userId, Long expirationTime, String tokenType) {
 		Claims claims = Jwts.claims()
 				.setSubject(String.valueOf(userId));
 
@@ -69,6 +72,7 @@ public class JwtTokenProvider {
 
 		return Jwts.builder()
 				.setClaims(claims)
+				.claim("token_type", tokenType)
 				.setIssuedAt(now)
 				.setExpiration(new Date(now.getTime() + expirationTime))
 				.signWith(SignatureAlgorithm.HS256, secretKey)
@@ -76,20 +80,25 @@ public class JwtTokenProvider {
 	}
 
 	// 토큰 유효성 검증
-	public boolean validateToken(String token) {
+	public boolean validateToken(String token, String tokenType) {
 		try {
+			// 토큰 타입 체크
+			Claims claims = getClaims(token);
+			if(!tokenType.equals(claims.get("token_type").toString())) {
+				throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN_TYPE);
+			}
+
+			// TODO : Redis 연결 후 다시 복구
 			// 블랙리스트 체크
 			if (redisTemplate.hasKey(BLACKLIST_PREFIX + token)) {
-				throw new BadCredentialsException("Invalid token");  // AuthenticationException 하위 클래스
+				throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN);
 			}
 			// 만료된 토큰인 경우 ExpiredJwtException 발생
 			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
 			return true;
 		} catch (RedisConnectionFailureException | RedisSystemException e) {
 			log.error("❌ Redis 오류 - 블랙리스트 조회 실패: {}", e.getMessage());
-			throw new CustomException(ErrorCode.REDIS_ERROR);
-		} catch (ExpiredJwtException e) {
-			throw new BadCredentialsException("Invalid token");  // AuthenticationException 하위 클래스
+			throw new JwtAuthenticationException(ErrorCode.REDIS_ERROR);
 		}
 	}
 
@@ -105,7 +114,7 @@ public class JwtTokenProvider {
 
 		// subject 값이 null 또는 빈 문자열인지 체크
 		if (userId == null || userId.trim().isEmpty()) {
-			throw new CustomException(ErrorCode.INVALID_TOKEN);
+			throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN);
 		}
 
 		String role = claims.get("role", String.class); // 역할 정보 추출 (없으면 null)

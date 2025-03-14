@@ -1,5 +1,6 @@
 # 1단계 : 빌드 단계
 FROM gradle:7.6-jdk17 as builder
+
 WORKDIR /home/app
 # 프로젝트 전체 소스 복사 (루트 기준)
 COPY . .
@@ -12,7 +13,6 @@ FROM openjdk:17-slim
 # 빌드 결과물 복사 (user의 bootJar 결과물)
 #터미널에서 C:\Users\LG\Desktop\trendly 디렉토리에서 docker build 명령어를 실행하면, 이 폴더가 빌드 컨텍스트의 루트가 됩니다.
 COPY --from=builder /home/app/user/build/libs/*.jar user.jar
-C:\Users\LG\Desktop\trendly\user
 
 # 컨테이너 시작 시 실행할 명령어 지정
 ENTRYPOINT ["java", "-DSpring.profiles.active=dev","-jar","user.jar"]

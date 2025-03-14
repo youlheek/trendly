@@ -26,19 +26,23 @@ public class CustomFilter extends OncePerRequestFilter {
 
 		// HTTP Header 에서 토큰 추출
 		String header = request.getHeader("Authorization");
-		String token = null;
 
 		if (header != null && header.startsWith("Bearer ")) {
-			token = header.substring(7);
-			if (token != null && jwtTokenProvider.validateToken(token)) {
+			String token = header.substring(7);
+			if (token != null && jwtTokenProvider.validateToken(token, "access")) {
+			// TODO : validateToken 에서 필터처리 중 에러 발생 시 500 "INTERNAL_SERVER_ERROR" 에러로 퉁쳐지는 현상
+
 				// 토큰에서 사용자 정보 추출 -> Authentication 객체 생성
 				Authentication auth = jwtTokenProvider.getAuthentication(token);
 
 				// SecurityContext에 auth(인증 정보) 저장
 				SecurityContextHolder.getContext().setAuthentication(auth);
-			} else {
-				throw new CustomException(ErrorCode.UNAUTHORIZED);
 			}
+			// 필터에서 예외를 던지면 SpringSecurity 가 이를 제대로 처리하지 못하고 클라이언트에 예외가 노출될 수 있으므로
+			// 인증 실패 시 예외를 던지지 않고 SecurityContextHolder에 인증 정보를 저장하지 않은 채로 요청을 진행시킴
+//			else {
+//				throw new CustomException(ErrorCode.UNAUTHORIZED);
+//			}
 		}
 
 		filterChain.doFilter(request, response);

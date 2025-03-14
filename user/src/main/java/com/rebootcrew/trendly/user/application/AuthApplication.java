@@ -6,6 +6,8 @@ import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -24,7 +26,12 @@ public class AuthApplication {
 		}
 
 		long expiration = jwtTokenProvider.getExpiration(token);
-		// TODO : Redis 연결 에러처리 필요?
-		authService.invalidateTokens(token, expiration);
+
+		try {
+			authService.invalidateTokens(token, expiration);
+		} catch (RedisConnectionFailureException | RedisSystemException e) {
+			log.error("❌ Redis 오류 - 블랙리스트 조회 실패: {}", e.getMessage());
+			throw new JwtAuthenticationException(ErrorCode.REDIS_ERROR);
+		}
 	}
 }

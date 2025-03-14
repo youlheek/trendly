@@ -58,7 +58,8 @@ public class AuthService {
 	 * @param user 저장된 사용자 정보
 	 * @return AuthResponse (JWT 포함)
 	 */
-	private AuthResponse generateAuthResponse(User user, boolean isNewUser) {
+	private AuthResponse generateAuthResponse(
+			User user, boolean isNewUser) {
 		String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
 		String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 		Long accessTokenExpiresIn = jwtTokenProvider.getExpiration(accessToken);

@@ -1,6 +1,7 @@
 package com.rebootcrew.trendly.user.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.rebootcrew.trendly.common.config.JwtTokenProvider;
 import com.rebootcrew.trendly.common.domain.User;
 import com.rebootcrew.trendly.common.exception.CustomException;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
@@ -25,13 +26,14 @@ public class KakaoAuthApplication {
 	private final AuthService authService;
 	private final KakaoService kakaoService;
 	private final UserRepository userRepository;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
 	private String kakaoClientId;
 	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
 	private String loginRedirectUri;
-	@Value("${kakao.logout-redirect-uri}")
-	private String logoutRedirectUri;
+//	@Value("${kakao.logout-redirect-uri}")
+//	private String logoutRedirectUri;
 
 
 	// redirect url 전송 & redirect url 로 인가 코드 받기
@@ -49,19 +51,15 @@ public class KakaoAuthApplication {
 	 * @return AuthResponse (Jwt 토큰, 유저 정보)
 	 * @throws JsonProcessingException
 	 */
-	public AuthResponse handleKakaoCallback(String code) throws JsonProcessingException {
+	public AuthResponse handleKakaoCallback(String code, String frontRedirectUrl) throws JsonProcessingException {
 		// 1. 토큰 발급
-		String accessToken = kakaoService.getAccessToken(code).getAccessToken();
+		String accessToken = kakaoService.getAccessToken(code, frontRedirectUrl).getAccessToken();
 
 		// 2. 사용자 정보 조회
 		KakaoUserResponse userInfo = kakaoService.getUserInfo(accessToken);
+		kakaoService.getUserServiceTerms(accessToken, userInfo);
 
 		// 3. DB에서 이메일 조회 (findByEmail 한 번만 실행!)
-		// - 이메일이 없으면 -> 회원가입
-		// - 이메일이 있으면 -> 로그인/탈퇴회원인지 조회 후 회원가입
-		// TODO : deletedAt 필드로 분기
-		// - deletedAt 필드가 notnull 일때(탈퇴처리된 회원) -> 7일 내인지 확인한 후 회원가입
-		// - deletedAt 필드가
 		Optional<User> existUser = userRepository.findByEmail(userInfo.getKakaoAccount().getEmail());
 
 		// 4. 회원가입 / 로그인 분기 처리
@@ -88,6 +86,7 @@ public class KakaoAuthApplication {
 			return authService.signUpUser(userInfo);
 		}
 	}
+
 
 //	/**
 //	 * 클라이언트 토큰 만료 후 카카오 로그아웃 URL 생성

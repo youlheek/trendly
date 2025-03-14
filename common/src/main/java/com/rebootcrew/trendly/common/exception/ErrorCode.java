@@ -1,5 +1,6 @@
 package com.rebootcrew.trendly.common.exception;
 
+import jakarta.annotation.Generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ public enum ErrorCode {
 
 	// 401 Unauthorize : 인증(Authentication)이 필요하거나 인증 정보가 잘못되었을 때 사용됩니다. 주로 로그인하지 않았거나, 토큰/비밀번호가 틀린 경우입니다.
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다."),
+	INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "유효한 토큰 타입이 아닙니다."),
 	LOGIN_CHECK_FAIL(HttpStatus.UNAUTHORIZED, "아이디와 패스워드를 확인해 주세요."),
 
 
@@ -40,4 +42,5 @@ public enum ErrorCode {
 	;
 	private final HttpStatus httpStatus;
 	private final String detail;
+
 }

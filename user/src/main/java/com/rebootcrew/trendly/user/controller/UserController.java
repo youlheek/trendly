@@ -1,7 +1,7 @@
 package com.rebootcrew.trendly.user.controller;
 
 import com.rebootcrew.trendly.common.exception.ErrorCode;
-import com.rebootcrew.trendly.common.exception.UnauthorizedException;
+import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.user.application.UserApplication;
 import com.rebootcrew.trendly.common.domain.UserForm;
 import com.rebootcrew.trendly.user.domain.UserResponse;
@@ -26,10 +26,9 @@ public class UserController {
 
 		// 인증된 사용자가 없으면 예외 발생
 		if (userDetails == null || userDetails.getUsername() == null) {
-			throw new UnauthorizedException(ErrorCode.NOT_FOUND_USER);
+			throw new JwtAuthenticationException(ErrorCode.NOT_FOUND_USER);
 		}
 
-		// TODO : Custom 에러 처리
 		try {
 			Long userId = (long) Integer.parseInt(userDetails.getUsername());
 			UserResponse response = UserResponse.fromDto(userApplication.getMyInfo(userId));
@@ -47,7 +46,7 @@ public class UserController {
 			@RequestBody @Valid UserForm request) { // @Valid 로 유효성 검사를 수행
 
 		if (userDetails == null || userDetails.getUsername() == null) {
-			throw new UnauthorizedException(ErrorCode.NOT_FOUND_USER);
+			throw new JwtAuthenticationException(ErrorCode.NOT_FOUND_USER);
 		}
 
 		try {
@@ -64,11 +63,11 @@ public class UserController {
 		if (token != null && token.startsWith("Bearer ")) {
 			token = token.substring(7);
 		} else {
-			throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+			throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN);
 		}
 
 		if (userDetails == null || userDetails.getUsername() == null) {
-			throw new UnauthorizedException(ErrorCode.NOT_FOUND_USER);
+			throw new JwtAuthenticationException(ErrorCode.NOT_FOUND_USER);
 		}
 
 		try {

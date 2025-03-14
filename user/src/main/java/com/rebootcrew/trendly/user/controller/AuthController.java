@@ -28,14 +28,16 @@ public class AuthController {
 		// refresh token 검증 및 새로운 access token 발급 로직 구현
 		// 예: DB 또는 캐시에서 해당 refresh token 정보를 확인한 후, 유효하면 새로운 access token 생성
 
+		// TODO : refresh token 만료되었을 때
 		String refreshToken = request.getRefreshToken();
 
 		try {
 			// refreshToken 검증
-			if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
+			if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken, "refresh")) {
 				Claims claims = jwtTokenProvider.getClaims(refreshToken);
 				long userId = Long.parseLong(claims.getSubject());
 
+				// TODO : 기존 accessToken 블랙리스트 처리
 				String newAccessToken = jwtTokenProvider.generateAccessToken(userId);
 				Long accessTokenExpiresIn = jwtTokenProvider.getExpiration(newAccessToken);
 
@@ -47,12 +49,11 @@ public class AuthController {
 								.refreshTokenExpiresIn(jwtTokenProvider.getExpiration(refreshToken) - new Date().getTime())
 								.tokenType("Bearer")
 								.user(userService.getUserInfo(userId))
-						.build()
+								.build()
 				);
 			}
 		} catch (Exception e) {
-
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorCode.INTERNAL_SERVER_ERROR);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 		return null;
 	}

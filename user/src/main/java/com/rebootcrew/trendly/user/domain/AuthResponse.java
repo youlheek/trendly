@@ -13,6 +13,7 @@ public class AuthResponse {
 	private Long refreshTokenExpiresIn; // ✅ 리프레시 토큰 만료 시간 추가
 
 	private String tokenType; // "Bearer"
+	private boolean isNewUser;
 
 	private UserDto user;
 }

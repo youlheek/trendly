@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.rebootcrew.trendly.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,10 +25,10 @@ public class ExceptionController {
 				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI()));
 	}
 
-	@ExceptionHandler(UnauthorizedException.class)
+	@ExceptionHandler(JwtAuthenticationException.class)
 	public ResponseEntity<ErrorResponse> handleUnauthorizedException(
-			final UnauthorizedException ex, HttpServletRequest request) {
-		log.error("UnauthorizedException 발생: {}", ex.getMessage());
+			final JwtAuthenticationException ex, HttpServletRequest request) {
+		log.error("JwtAuthenticationException 발생: {}", ex.getMessage());
 		return ResponseEntity.status(ex.getErrorCode().getHttpStatus())
 				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI()));
 	}

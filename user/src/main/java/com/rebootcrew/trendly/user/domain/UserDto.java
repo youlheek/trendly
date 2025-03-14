@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class UserDto {
 	// TODO : 이렇게 정보를 때려박아도 되는거냐......?
 	private Long id;
+	private Long kakaoUserId;
 	private String email;
 
 	private LocalDate birthDate;
@@ -24,6 +25,7 @@ public class UserDto {
 	public static UserDto fromEntity(User user) {
 		return UserDto.builder()
 				.id(user.getId())
+				.kakaoUserId(user.getKakaoUserId())
 				.email(user.getEmail())
 				.birthDate(user.getBirthDate())
 				.gender(user.getGender())

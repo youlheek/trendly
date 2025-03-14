@@ -13,7 +13,8 @@ allprojects {
 }
 
 bootJar {
-    mainClass.set('com.rebootcrew.trendly.trendly.TrendlyApplication')
+    // 실행에 사용할 main 클래스를 명시합니다.
+    mainClass = 'com.rebootcrew.trendly.trendly.TrendlyApplication'
 }
 
 
@@ -26,17 +27,12 @@ dependencies {
     implementation project(':batch')
 
     implementation 'org.springframework.boot:spring-boot-starter'
-
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.data:spring-data-envers'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'  // JUnit 플랫폼 실행기
-
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'

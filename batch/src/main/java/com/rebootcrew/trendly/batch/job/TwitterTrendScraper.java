@@ -15,7 +15,7 @@ public class TwitterTrendScraper {
 	private static final String TWITTER_USERNAME = "";
 	private static final String TWITTER_PASSWORD = "";
 
-	public static void main(String[] args) {
+	public static void twitterscrpper() {
 		// ✅ 최신 ChromeDriver 사용
 		WebDriverManager.chromedriver().setup();
 		System.setProperty("webdriver.chrome.driver", "C:\\chromedriver.exe");

@@ -1,36 +1,35 @@
 
 # 서버 설정
 server:
-  port: ${SPRING_PORT}  # 애플리케이션이 실행될 포트 번호 설정
+  port: ${SPRING_PORT:8080}  # ??????? ??? ?? ?? ??
   error:
     whitelabel:
       enabled: false  # Spring Boot 기본 에러 페이지(whitelabel error page) 비활성화
 
 # 스프링 애플리케이션 설정
 spring:
-  profiles:
-    active: dev  # 활성화된 프로파일
   batch:
     job:
       enabled: false
 
   application:
     name: trendly  # 애플리케이션 이름 설정
-
-  # 데이터베이스 설정
+    mvc:
+      pathmatch:
+        matching-strategy: ant_path_matcher    # 원본 값 사용
   datasource:
-    url: jdbc:mysql://localhost:3306/trendly-db  # MySQL 데이터베이스 연결 URL
-    username: ${PUBLIC_NAME}  # 데이터베이스 사용자 이름
-    password: ${PUBLIC_PASSWORD}   # 데이터베이스 비밀번호
-    driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC 드라이버 클래스
-    hikari:  # HikariCP(커넥션 풀) 설정
-      pool-name: HikariCP  # 커넥션 풀 이름
-      maximum-pool-size: 10  # 최대 커넥션 풀 크기
-      minimum-idle: 5  # 최소 유지 커넥션 개수
-      idle-timeout: 30000  # 커넥션 유휴 상태 유지 시간(ms)
-      connection-timeout: 20000  # 커넥션 획득 대기 시간(ms)
-      max-lifetime: 1800000  # 커넥션 최대 수명(ms)
-      connection-test-query: SELECT 1  # 커넥션 유효성 검사 쿼리
+    url: jdbc:mysql://localhost:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL ?????? ?? URL
+    username: ${PUBLIC_NAME:trendly}
+    password: ${PUBLIC_PASSWORD:rootroot}
+    driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC ???? ???
+    hikari:  # HikariCP(??? ?) ??
+      pool-name: HikariCP  # ??? ? ??
+      maximum-pool-size: 10  # ?? ??? ? ??
+      minimum-idle: 5  # ?? ?? ??? ??
+      idle-timeout: 30000  # ??? ?? ?? ?? ??(ms)
+      connection-timeout: 20000  # ??? ?? ?? ??(ms)
+      max-lifetime: 1800000  # ??? ?? ??(ms)
+      connection-test-query: SELECT 1  # ??? ??? ?? ??
 
   # JPA 설정
   jpa:
@@ -40,21 +39,34 @@ spring:
     show-sql: true  # SQL 쿼리 로깅 활성화
     properties:
       hibernate:
-        format_sql: true  # SQL 출력 포맷 설정(가독성을 위해)
-    #
-    #  # MongoDB 설정
+        format_sql: true  # SQL ?? ?? ??(???? ??)
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 0ff4f0cc878339e75d6a7f55b88fa027
+            redirect-uri: http://localhost:8080/auth/kakao/callback
+    #  # MongoDB ??
     #  data:
     #    mongodb:
     #      uri: mongodb://localhost:27017/adarticle-db  # MongoDB 연결 URI
 
-    # Redis 설정
-    redis:
-      host: localhost  # Redis 호스트
-      port: ${REDIS_PORT}  # Redis 포트 번호
+    # Redis ??
+  redis:
+    host: 54.180.63.180  # Redis ???
+    port: ${REDIS_PORT:6379}  # Redis ?? ??
 
-  # RabbitMQ 설정
-  rabbitmq:
-    host: localhost  # .env에서 가져오거나 기본값
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_DEFAULT_USER}
-    password: ${PUBLIC_PASSWORD}  # .env에 없으므로 추가 필요
+# RabbitMQ ??
+rabbitmq:
+  host: localhost  # .env?? ????? ???
+  port: ${RABBITMQ_PORT}
+  username: ${RABBITMQ_DEFAULT_USER}
+  password: ${PUBLIC_PASSWORD}  # .env? ???? ?? ??
+
+jwt:
+  secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
+  access-token:
+    expiration: 300000                       # 3m
+  refresh-token:
+    expiration: 300000

@@ -29,7 +29,7 @@ public class UserDto {
 				.email(user.getEmail())
 				.birthDate(user.getBirthDate())
 				.gender(user.getGender())
-				.marketingOpt(user.isMarketingOpt())
+				.marketingOpt(user.getMarketingOpt())
 				.createDate(user.getCreatedAt())
 				.modifiedDate(user.getUpdatedAt())
 				.build();

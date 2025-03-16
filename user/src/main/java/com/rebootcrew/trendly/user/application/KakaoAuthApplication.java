@@ -60,7 +60,9 @@ public class KakaoAuthApplication {
 		kakaoService.getUserServiceTerms(accessToken, userInfo);
 
 		// 3. DB에서 이메일 조회 (findByEmail 한 번만 실행!)
-		Optional<User> existUser = userRepository.findByEmail(userInfo.getKakaoAccount().getEmail());
+		// 삭제 이력이 1건 이상일 경우
+		// - OrderByDeletedAtDesc 조건으로 조회
+		Optional<User> existUser = userRepository.findFirstByEmailAndDeletedAtIsNotNullOrderByDeletedAtDesc(userInfo.getKakaoAccount().getEmail());
 
 		// 4. 회원가입 / 로그인 분기 처리
 		if (existUser.isPresent()) {

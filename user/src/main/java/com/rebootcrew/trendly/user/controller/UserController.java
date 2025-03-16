@@ -57,7 +57,7 @@ public class UserController {
 		}
 	}
 
-	@DeleteMapping("/delete") // JWT 필요 ✅
+	@PatchMapping("/delete") // JWT 필요 ✅
 	public ResponseEntity<String> deleteUser(HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
 		String token = request.getHeader("Authorization");
 		if (token != null && token.startsWith("Bearer ")) {

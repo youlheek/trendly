@@ -51,16 +51,25 @@ public class UserService {
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
 		// Gender 유효성 검사 (열거형 값만 허용)
-		if (userForm.getGender() != null && EnumUtils.isValidEnum(Gender.class, userForm.getGender())) {
-			throw new CustomException(ErrorCode.INVALID_INPUT);
+		if (userForm.getGender() != null && !userForm.getGender().equals("")) {
+			if (EnumUtils.isValidEnum(Gender.class, userForm.getGender().toUpperCase())) {
+				user.setGender(userForm.getGender().toUpperCase());
+			} else {
+				throw new CustomException(ErrorCode.INVALID_INPUT);
+			}
 		}
-		user.setGender(userForm.getGender());
 		// Birthdate 유효성 검사
-		if (userForm.getBirthDate() != null && userForm.getBirthDate().isAfter(LocalDate.now())) {
-			throw new CustomException(ErrorCode.INVALID_INPUT);
+		if (userForm.getBirthDate() != null && !userForm.getBirthDate().equals("")) {
+			if (userForm.getBirthDate().isAfter(LocalDate.now())) {
+				throw new CustomException(ErrorCode.INVALID_INPUT);
+			} else {
+				user.setBirthDate(userForm.getBirthDate());
+			}
 		}
-		user.setBirthDate(userForm.getBirthDate());
-		user.setMarketingOpt(userForm.isMarketingOpt());
+
+		if (userForm.getMarketingOpt() != null && !userForm.getMarketingOpt().equals("")) {
+			user.setMarketingOpt(userForm.getMarketingOpt());
+		}
 
 		try {
 			return UserDto.fromEntity(userRepository.save(user));

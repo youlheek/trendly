@@ -21,6 +21,7 @@ public enum ErrorCode {
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다."),
 	INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "유효한 토큰 타입이 아닙니다."),
 	LOGIN_CHECK_FAIL(HttpStatus.UNAUTHORIZED, "아이디와 패스워드를 확인해 주세요."),
+	KAKAO_TOKEN_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, "카카오 토큰 발급에 실패했습니다."),
 
 
 	// 403 Forbidden : 클라이언트가 인증은 되었지만, 권한(Authorization)이 없어서 요청이 거부되었을 때 사용됩니다. 서버가 요청을 이해했지만, 접근을 허용하지 않는 경우입니다.

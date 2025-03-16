@@ -2,9 +2,12 @@ package com.rebootcrew.trendly.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rebootcrew.trendly.common.exception.CustomException;
+import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.user.domain.KakaoTokenResponse;
 import com.rebootcrew.trendly.user.domain.KakaoUserResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
@@ -54,6 +58,10 @@ public class KakaoService {
 						request,
 						String.class);
 
+		if (response.getStatusCode() != HttpStatus.OK) {
+			log.error("Kakao token request failed: {}", response.getBody());
+			throw new CustomException(ErrorCode.KAKAO_TOKEN_REQUEST_FAILED);
+		}
 		return objectMapper.readValue(response.getBody(), KakaoTokenResponse.class);
 	}
 

@@ -5,7 +5,8 @@ server:
   error:
     whitelabel:
       enabled: false  # Spring Boot ?? ?? ???(whitelabel error page) ????
-
+  base-url: 54.180.63.180
+  url: http://54.180.63.180:8080
 # ??? ?????? ??
 spring:
   redis:
@@ -25,7 +26,7 @@ spring:
         matching-strategy: ant_path_matcher    # 원본 값 사용
   # ?????? ??
   datasource:
-    url: jdbc:mysql://54.180.63.180:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL ?????? ?? URL
+    url: jdbc:mysql://${server.base-url}:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL ?????? ?? URL
     username: ${PUBLIC_NAME:trendly}
     password: ${PUBLIC_PASSWORD:rootroot}
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC ???? ???
@@ -53,7 +54,7 @@ spring:
         registration:
           kakao:
             client-id: 0ff4f0cc878339e75d6a7f55b88fa027
-            redirect-uri: http://54.180.63.180:8080/auth/kakao/callback
+            redirect-uri: http://${server.base-url}:8080/auth/kakao/callback
 
     #
     #  # MongoDB ??

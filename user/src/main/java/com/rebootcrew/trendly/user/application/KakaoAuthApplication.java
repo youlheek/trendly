@@ -60,31 +60,43 @@ public class KakaoAuthApplication {
 		kakaoService.getUserServiceTerms(accessToken, userInfo);
 
 		// 3. DB에서 이메일 조회 (findByEmail 한 번만 실행!)
-		Optional<User> existUser = userRepository.findByEmail(userInfo.getKakaoAccount().getEmail());
+		// 삭제 이력이 없는 계정이 있는지 확인
+		// 있으면 -> 로그인
+		// 없으면 -> 탈퇴 처리된 계정이 있는지 확인
+		// 있으면 -> 날짜 확인
+		// 7일 이내일 경우 -> 에러 반환
+		// 7일 이후일 경우 -> 회원가입
+		// 없으면 -> 회원가입
 
 		// 4. 회원가입 / 로그인 분기 처리
-		if (existUser.isPresent()) {
-			User user = existUser.get();
-
-			// 탈퇴 여부 확인
-			if (user.getDeletedAt() != null) {
-				// 탈퇴한 경우 -> 7일 내인지 확인
-				LocalDateTime now = LocalDateTime.now();
-				LocalDateTime deletedAtPlus7days = user.getDeletedAt().plusDays(7);
-
-				if (now.isAfter(deletedAtPlus7days)) {
-					// 회원가입 처리 (재가입)
-					return authService.signUpUser(userInfo);
-				} else {
-					throw new CustomException(ErrorCode.USER_ALREADY_DELETED_EXPIRED);
-				}
-
-			}
-			// 탈퇴 X -> 로그인
+		String email = userInfo.getKakaoAccount().getEmail();
+		// 4-1. 활성화된 계정 조회
+		Optional<User> activeUser = userRepository.findByEmailAndDeletedAtIsNull(email);
+		if (activeUser.isPresent()) {
+			// 활성화된 계정이 존재하면 로그인 처리
+			User user = activeUser.get();
 			return authService.loginUser(user);
-		} else {
-			return authService.signUpUser(userInfo);
 		}
+
+		// 4-2. 삭제 처리된 계정이 있는지 조회
+		Optional<User> deletedUser = userRepository.findFirstByEmailAndDeletedAtIsNotNullOrderByDeletedAtDesc(userInfo.getKakaoAccount().getEmail());
+		if (deletedUser.isPresent()) {
+			User user = deletedUser.get();
+
+			// 탈퇴한 경우 -> 7일 내인지 확인
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime deletedAtPlus7days = user.getDeletedAt().plusDays(7);
+
+			if (now.isAfter(deletedAtPlus7days)) {
+				// 회원가입 처리 (재가입)
+				return authService.signUpUser(userInfo);
+			} else {
+				throw new CustomException(ErrorCode.USER_ALREADY_DELETED_EXPIRED);
+			}
+		}
+
+		// 4-3. active한 계정도, 삭제 기록도 없는 경우 -> 신규 회원가입
+		return authService.signUpUser(userInfo);
 	}
 
 

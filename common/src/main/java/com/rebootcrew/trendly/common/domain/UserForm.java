@@ -11,5 +11,6 @@ public class UserForm {
 	private String gender;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
-	private boolean marketingOpt;
+	private Boolean marketingOpt;
+
 }

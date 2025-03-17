@@ -8,8 +8,10 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	Optional<User> findByEmail(String email);
+	Optional<User> findByEmailAndDeletedAtIsNull(String email);
+	Optional<User> findFirstByEmailAndDeletedAtIsNotNullOrderByDeletedAtDesc(String email);
 
 	Optional<User> findById(Long id);
 	Optional<User> findByIdAndDeletedAtIsNull(Long id);
+	// TODO : findById~ 둘 다 사용해도 되는가?
 }

@@ -1,10 +1,14 @@
 package com.rebootcrew.trendly.user.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.user.application.UserApplication;
 import com.rebootcrew.trendly.common.domain.UserForm;
+import com.rebootcrew.trendly.user.domain.UserDto;
 import com.rebootcrew.trendly.user.domain.UserResponse;
+import com.rebootcrew.trendly.user.service.KakaoService;
+import com.rebootcrew.trendly.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,8 @@ public class UserController {
 	// 회원 관리 컨트롤러
 
 	private final UserApplication userApplication;
+	private final KakaoService kakaoService;
+	private final UserService userService;
 
 	@GetMapping("/me") // JWT 필요 ✅
 	public ResponseEntity<UserResponse> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
@@ -57,7 +63,7 @@ public class UserController {
 		}
 	}
 
-	@DeleteMapping("/delete") // JWT 필요 ✅
+	@PatchMapping("/delete") // JWT 필요 ✅
 	public ResponseEntity<String> deleteUser(HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
 		String token = request.getHeader("Authorization");
 		if (token != null && token.startsWith("Bearer ")) {
@@ -71,11 +77,11 @@ public class UserController {
 		}
 
 		try {
-			Long userId = (long) Integer.parseInt(userDetails.getUsername());
+			Long userId = Long.parseLong(userDetails.getUsername());
+
 			return ResponseEntity.ok(userApplication.deleteUser(userId, token));
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("유효하지 않은 사용자 ID 입니다.", e);
-
 		}
 	}
 }

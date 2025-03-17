@@ -16,6 +16,7 @@ public enum ErrorCode {
 	INVALID_VERIFICATION(HttpStatus.BAD_REQUEST,"잘못된 인증 시도입니다."),
 	INVALID_INPUT(HttpStatus.BAD_REQUEST, "잘못된 입력입니다."),
 	INVALID_JSON_FORMAT(HttpStatus.BAD_REQUEST, "잘못된 JSON 형식입니다."),
+	NOT_FOUND_ROOM(HttpStatus.BAD_REQUEST, "해당 채팅방이 존재하지 않거나 닫힌 상태입니다."),
 
 	// 401 Unauthorize : 인증(Authentication)이 필요하거나 인증 정보가 잘못되었을 때 사용됩니다. 주로 로그인하지 않았거나, 토큰/비밀번호가 틀린 경우입니다.
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다."),
@@ -36,11 +37,12 @@ public enum ErrorCode {
 	// 500 Internal Server Error
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
 	REDIS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Redis 처리 중 오류가 발생했습니다."),
-	JWT_BLACKLIST_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 블랙리스트 처리 중 오류가 발생했습니다."),
+	JWT_BLACKLIST_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 블랙리스트 처리 중 오류가 발생했습니다.")
 
 
 
 	;
+
 	private final HttpStatus httpStatus;
 	private final String detail;
 

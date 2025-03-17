@@ -19,8 +19,9 @@ public class ChatRoom {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// TODO : keyword와 연관된 사항 정리
 	// TODO : keyword 엔티티와 연결
+//	@JoinColumn(name = "keyword_id")
+//	private Keyword keyword;
 	@Column(name = "keyword_id", nullable = false)
 	private Long keywordId;
 

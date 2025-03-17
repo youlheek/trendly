@@ -1,9 +1,11 @@
 package com.rebootcrew.trendly.user.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rebootcrew.trendly.common.config.JwtTokenProvider;
 import com.rebootcrew.trendly.user.domain.UserDto;
 import com.rebootcrew.trendly.common.domain.UserForm;
 import com.rebootcrew.trendly.user.service.AuthService;
+import com.rebootcrew.trendly.user.service.KakaoService;
 import com.rebootcrew.trendly.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ public class UserApplication {
 	private final UserService userService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AuthService authService;
+	private final KakaoService kakaoService;
 
 
 	/**
@@ -46,6 +49,10 @@ public class UserApplication {
 	 */
 	@Transactional
 	public String deleteUser(Long userId, String token) {
+
+		// 카카오 연결 끊기
+		UserDto userInfo = userService.getUserInfo(userId);
+		kakaoService.kakaoUnlinck(userInfo.getKakaoUserId());
 
 		// Redis 블랙리스트 처리
 		long expiration = jwtTokenProvider.getExpiration(token);

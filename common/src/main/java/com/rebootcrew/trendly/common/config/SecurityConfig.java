@@ -59,7 +59,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://54.180.63.180:3000", "http://localhost:8080", "http://localhost:63342")); // 허용할 Origin
+		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://54.180.63.180:3000", "http://localhost:8080", "http://localhost:63342", "http://54.180.63.180:80", "http://54.180.63.180")); // 허용할 Origin
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
 		configuration.setAllowCredentials(true); // 쿠키 포함 허용

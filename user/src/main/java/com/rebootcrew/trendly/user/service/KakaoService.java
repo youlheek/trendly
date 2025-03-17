@@ -116,7 +116,7 @@ public class KakaoService {
 
 	}
 
-	public void kakaoUnlinck(Long userId) throws JsonProcessingException {
+	public void kakaoUnlinck(Long userId) {
 
 		// 헤더 설정
 		HttpHeaders headers = new HttpHeaders();

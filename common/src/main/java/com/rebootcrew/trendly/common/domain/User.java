@@ -25,7 +25,7 @@ public class User extends BaseEntity {
 	@Column(name = "kakao_user_id")
 	private Long kakaoUserId;
 
-	@Column(unique = true, nullable = false)
+	@Column(nullable = false)
 	private String email;
 	private String password;
 
@@ -34,17 +34,16 @@ public class User extends BaseEntity {
 	private String gender;
 
 	@Column(name = "marketing_opt")
-	private boolean marketingOpt; // 마케팅 정보 동의
+	private Boolean marketingOpt; // 마케팅 정보 동의
 
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
-
-	public static User from (UserForm form) {
-		return User.builder()
-				.birthDate(form.getBirthDate())
-				.gender(form.getGender())
-				.marketingOpt(form.isMarketingOpt())
-				.build();
+	@PrePersist // Boolean 원시 타입을 위한 null 방지
+	public void prePersist() {
+		if (marketingOpt == null) {
+			marketingOpt = Boolean.FALSE;
+		}
 	}
+
 }

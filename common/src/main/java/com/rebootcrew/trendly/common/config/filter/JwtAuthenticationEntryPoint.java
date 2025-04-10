@@ -1,13 +1,11 @@
 package com.rebootcrew.trendly.common.config.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rebootcrew.trendly.common.dto.ErrorResponse;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;

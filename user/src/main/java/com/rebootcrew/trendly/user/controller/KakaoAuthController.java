@@ -26,7 +26,6 @@ public class KakaoAuthController {
 
 	private final KakaoAuthApplication kakaoAuthApplication;
 	private final AuthApplication authApplication;
-	private final ObjectMapper objectMapper;
 	private final UserService userService;
 	private final KakaoService kakaoService;
 

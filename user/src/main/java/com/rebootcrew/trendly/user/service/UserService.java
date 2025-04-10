@@ -6,12 +6,11 @@ import com.rebootcrew.trendly.common.exception.CustomException;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.common.respository.UserRepository;
 import com.rebootcrew.trendly.user.domain.UserDto;
-import com.rebootcrew.trendly.common.domain.UserForm;
+import com.rebootcrew.trendly.common.domain.dto.UserForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,7 @@ public class UserService {
 	 */
 	public UserDto getUserInfo(Long userId) {
 		UserDto userDto = UserDto.fromEntity(userRepository.findByIdAndDeletedAtIsNull(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER, "")));
 		return userDto;
 	}
 
@@ -48,20 +47,20 @@ public class UserService {
 	@Transactional(rollbackFor = Exception.class) // 모든 예외에서 롤백처리
 	public UserDto updateUser(Long userId, UserForm userForm) {
 		User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER, ""));
 
 		// Gender 유효성 검사 (열거형 값만 허용)
 		if (userForm.getGender() != null && !userForm.getGender().equals("")) {
 			if (EnumUtils.isValidEnum(Gender.class, userForm.getGender().toUpperCase())) {
 				user.setGender(userForm.getGender().toUpperCase());
 			} else {
-				throw new CustomException(ErrorCode.INVALID_INPUT);
+				throw new CustomException(ErrorCode.INVALID_INPUT, "");
 			}
 		}
 		// Birthdate 유효성 검사
 		if (userForm.getBirthDate() != null && !userForm.getBirthDate().equals("")) {
 			if (userForm.getBirthDate().isAfter(LocalDate.now())) {
-				throw new CustomException(ErrorCode.INVALID_INPUT);
+				throw new CustomException(ErrorCode.INVALID_INPUT, "");
 			} else {
 				user.setBirthDate(userForm.getBirthDate());
 			}
@@ -74,14 +73,14 @@ public class UserService {
 		try {
 			return UserDto.fromEntity(userRepository.save(user));
 		} catch (DateTimeParseException | DataIntegrityViolationException e) {
-			throw new CustomException(ErrorCode.INVALID_INPUT);
+			throw new CustomException(ErrorCode.INVALID_INPUT, "");
 		}
 	}
 
 	@Transactional(rollbackFor = Exception.class) // 모든 예외에서 롤백처리
 	public void deleteUser(Long userId) {
 		User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER, ""));
 		user.setDeletedAt(LocalDateTime.now());
 		userRepository.save(user);
 

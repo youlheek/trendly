@@ -88,7 +88,6 @@ public class JwtTokenProvider {
 				throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN_TYPE);
 			}
 
-			// TODO : Redis 연결 후 다시 복구
 			// 블랙리스트 체크
 			if (redisTemplate.hasKey(BLACKLIST_PREFIX + token)) {
 				throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN);

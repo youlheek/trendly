@@ -1,11 +1,9 @@
 package com.rebootcrew.trendly.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
 import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.user.application.UserApplication;
-import com.rebootcrew.trendly.common.domain.UserForm;
-import com.rebootcrew.trendly.user.domain.UserDto;
+import com.rebootcrew.trendly.common.domain.dto.UserForm;
 import com.rebootcrew.trendly.user.domain.UserResponse;
 import com.rebootcrew.trendly.user.service.KakaoService;
 import com.rebootcrew.trendly.user.service.UserService;

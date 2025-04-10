@@ -30,7 +30,6 @@ public class CustomFilter extends OncePerRequestFilter {
 		if (header != null && header.startsWith("Bearer ")) {
 			String token = header.substring(7);
 			if (token != null && jwtTokenProvider.validateToken(token, "access")) {
-			// TODO : validateToken 에서 필터처리 중 에러 발생 시 500 "INTERNAL_SERVER_ERROR" 에러로 퉁쳐지는 현상
 
 				// 토큰에서 사용자 정보 추출 -> Authentication 객체 생성
 				Authentication auth = jwtTokenProvider.getAuthentication(token);

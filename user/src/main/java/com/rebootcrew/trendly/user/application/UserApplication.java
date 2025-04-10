@@ -1,9 +1,9 @@
 package com.rebootcrew.trendly.user.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rebootcrew.trendly.common.config.JwtTokenProvider;
+import com.rebootcrew.trendly.discussion.service.ChatRoomService;
 import com.rebootcrew.trendly.user.domain.UserDto;
-import com.rebootcrew.trendly.common.domain.UserForm;
+import com.rebootcrew.trendly.common.domain.dto.UserForm;
 import com.rebootcrew.trendly.user.service.AuthService;
 import com.rebootcrew.trendly.user.service.KakaoService;
 import com.rebootcrew.trendly.user.service.UserService;
@@ -21,6 +21,7 @@ public class UserApplication {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AuthService authService;
 	private final KakaoService kakaoService;
+	private final ChatRoomService chatRoomService;
 
 
 	/**
@@ -49,17 +50,20 @@ public class UserApplication {
 	 */
 	@Transactional
 	public String deleteUser(Long userId, String token) {
-
-		// 카카오 연결 끊기
-		UserDto userInfo = userService.getUserInfo(userId);
-		kakaoService.kakaoUnlinck(userInfo.getKakaoUserId());
+		// 모든 채팅방 나가기
+		chatRoomService.leftAllChatRoom(userId);
 
 		// Redis 블랙리스트 처리
 		long expiration = jwtTokenProvider.getExpiration(token);
 		authService.invalidateTokens(token, expiration);
 
+		// DB deleteAt
+		UserDto userInfo = userService.getUserInfo(userId);
 		userService.deleteUser(userId);
-		return "회원 탈퇴가 완료되었습니다.";
+
+		// 카카오 연결 끊기
+		kakaoService.kakaoUnlinck(userInfo.getKakaoUserId());
+		return "회원 탈퇴가 완료되었습니다. ";
 	}
 
 }

@@ -33,6 +33,7 @@ public class ChatRoomMember {
 	@Column(nullable = false)
 	private ChatRoomMemeberStatus status = ChatRoomMemeberStatus.ACTIVE;
 	// 채팅방에 들어갈 때 ACTIVE 를 기본값으로 사용
+	// delete 대신 LEFT 사용
 
 	@Column(name = "joined_at")
 	private LocalDateTime joinedAt;

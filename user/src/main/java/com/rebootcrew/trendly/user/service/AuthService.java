@@ -111,7 +111,7 @@ public class AuthService {
 			return redisTemplate.hasKey(BLACKLIST_PREFIX + token);
 		} catch (RedisConnectionFailureException | RedisSystemException e) {
 			log.error("❌ Redis 오류 - 블랙리스트 조회 실패: {}", e.getMessage());
-			throw new CustomException(ErrorCode.REDIS_ERROR);
+			throw new CustomException(ErrorCode.REDIS_ERROR, "");
 		}
 	}
 }

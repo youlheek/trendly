@@ -3,18 +3,22 @@ package com.rebootcrew.trendly.common.config;
 import com.rebootcrew.trendly.common.config.filter.CustomFilter;
 import com.rebootcrew.trendly.common.config.filter.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
+import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.messaging.access.intercept.ChannelSecurityInterceptor;
+import org.springframework.security.messaging.access.intercept.MessageSecurityMetadataSource;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 import java.util.List;
 
@@ -27,6 +31,7 @@ public class SecurityConfig {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+	// HTTP 보안 설정
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
@@ -38,12 +43,14 @@ public class SecurityConfig {
 				.authorizeHttpRequests(
 						auth -> auth.requestMatchers(
 										"/auth/**",
-										"/api/auth/**",
+										"/api/auth/**", // refresh token사용하여 토큰 재발급
 										"/swagger-ui/**",
 										"/swagger-ui/index.html",
 										"/swagger-resources/**",
 										"/v3/api-docs/**",
-										"/hello/**"
+										"/hello/**",
+										"/api/chat/rooms",
+										"/ws/**" // Websocket 엔드포인트 인증 제외
 								).permitAll()
 								.anyRequest().authenticated() // 그 외 요청은 인증 필요
 				)
@@ -55,12 +62,12 @@ public class SecurityConfig {
 
 	}
 
-	// ✅ CORS 설정 추가 (SecurityConfig에서 직접 관리)
+	// CORS 설정 추가 (SecurityConfig에서 직접 관리)
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://54.180.63.180:3000", "http://localhost:8080", "http://localhost:63342", "http://54.180.63.180:80", "http://54.180.63.180")); // 허용할 Origin
-		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS"));
+		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://54.180.63.180:3000", "http://localhost:8080", "http://localhost:63342", "http://54.180.63.180:80", "http://54.180.63.180", "https://jiangxy.github.io")); // 허용할 Origin
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
 		configuration.setAllowCredentials(true); // 쿠키 포함 허용
 
@@ -68,4 +75,6 @@ public class SecurityConfig {
 		source.registerCorsConfiguration("/**", configuration); // 모든 경로에 적용
 		return source;
 	}
+
+
 }

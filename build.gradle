@@ -57,6 +57,8 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
 
+    implementation 'org.springframework.security:spring-security-messaging'
+
 }
 
 
@@ -96,6 +98,8 @@ subprojects {
         implementation 'io.jsonwebtoken:jjwt-api:0.11.5' // JWT
         runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
         runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+        // SecurityConfig 에서 AbstractSecurityWebSocketMessageBrokerConfigurer 사용하기 위한 의존성
+        implementation 'org.springframework.security:spring-security-messaging'
 
         // MySQL
         implementation 'mysql:mysql-connector-java:8.0.32'
@@ -121,11 +125,16 @@ subprojects {
         //amqp rabbitmq message기능을 위한
         implementation("org.springframework.boot:spring-boot-starter-amqp")
 
+        // 메시지 처리를
         runtimeOnly 'com.mysql:mysql-connector-j'
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.security:spring-security-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        // test를 위한 mockito
+        testImplementation 'org.mockito:mockito-core'
+
 
     }
 

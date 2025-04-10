@@ -27,8 +27,8 @@ public class KeywordPlatformRanking extends BaseEntity {
     @Column(name = "platform_keyword_id", nullable = false)
     private Long platformKeywordId;
 
-    @Column(name = "rank", nullable = false)
-    private Integer rank;
+    @Column(name = "ranking", nullable = false)
+    private Integer ranking;
 
     @Column(name = "previous_rank")
     private Integer previousRank;

@@ -1,4 +1,4 @@
-package com.rebootcrew.trendly.discussion.domain.enums;
+package com.rebootcrew.trendly.common.domain.enums;
 
 public enum ChatRoomStatus {
 	OPEN,

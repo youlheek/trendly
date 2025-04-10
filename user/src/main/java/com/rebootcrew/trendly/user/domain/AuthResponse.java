@@ -1,10 +1,14 @@
 package com.rebootcrew.trendly.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder // 확장 가능성을 고려해 Builder 패턴으로 설정
+@JsonInclude(JsonInclude.Include.NON_NULL)  // ✅ null인 필드는 아예 제외
 public class AuthResponse {
 	private String accessToken;
 	private String refreshToken;
@@ -16,4 +20,5 @@ public class AuthResponse {
 	private boolean isNewUser;
 
 	private UserDto user;
+	private LocalDateTime rejoinAvailableAt;
 }

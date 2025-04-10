@@ -1,4 +1,4 @@
-package com.rebootcrew.trendly.common.domain;
+package com.rebootcrew.trendly.common.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

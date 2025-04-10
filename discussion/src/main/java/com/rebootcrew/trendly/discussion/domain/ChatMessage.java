@@ -3,6 +3,8 @@ package com.rebootcrew.trendly.discussion.domain;
 import com.rebootcrew.trendly.common.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +27,10 @@ public class ChatMessage {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "chat_room_member_id", nullable = true)
+	private ChatRoomMember chatRoomMember;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "chatRoom_id")

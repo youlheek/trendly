@@ -60,7 +60,7 @@ public class KakaoService {
 
 		if (response.getStatusCode() != HttpStatus.OK) {
 			log.error("Kakao token request failed: {}", response.getBody());
-			throw new CustomException(ErrorCode.KAKAO_TOKEN_REQUEST_FAILED);
+			throw new CustomException(ErrorCode.KAKAO_TOKEN_REQUEST_FAILED, "");
 		}
 		return objectMapper.readValue(response.getBody(), KakaoTokenResponse.class);
 	}

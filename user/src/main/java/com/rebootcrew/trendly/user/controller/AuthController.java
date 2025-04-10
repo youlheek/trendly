@@ -37,7 +37,7 @@ public class AuthController {
 				Claims claims = jwtTokenProvider.getClaims(refreshToken);
 				long userId = Long.parseLong(claims.getSubject());
 
-				// TODO : 기존 accessToken 블랙리스트 처리
+				// TODO : 기존 accessToken 블랙리스트 처리 -> 기존 accessToken 을 어디서 받아올 것이냐?
 				String newAccessToken = jwtTokenProvider.generateAccessToken(userId);
 				Long accessTokenExpiresIn = jwtTokenProvider.getExpiration(newAccessToken);
 

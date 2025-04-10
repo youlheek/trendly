@@ -2,7 +2,7 @@ package com.rebootcrew.trendly.common.exception;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.rebootcrew.trendly.common.dto.ErrorResponse;
+import com.rebootcrew.trendly.common.domain.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +23,16 @@ public class ExceptionController {
 	public ResponseEntity<ErrorResponse> customRequestException (
 			final CustomException ex, HttpServletRequest request) {
 		log.error("CustomException 발생: {}", ex.getMessage());
-		return ResponseEntity.status(ex.getErrorCode().getHttpStatus())
-				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI()));
+
+		if (ex.getExtra() != null) {
+			return ResponseEntity
+				.status(ex.getErrorCode().getHttpStatus())
+				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI(), ex.getExtra()));
+		}
+
+		return ResponseEntity
+				.status(ex.getErrorCode().getHttpStatus())
+				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI(), null));
 	}
 
 	@ExceptionHandler(JwtAuthenticationException.class)
@@ -32,7 +40,7 @@ public class ExceptionController {
 			final JwtAuthenticationException ex, HttpServletRequest request) {
 		log.error("JwtAuthenticationException 발생: {}", ex.getMessage());
 		return ResponseEntity.status(ex.getErrorCode().getHttpStatus())
-				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI()));
+				.body(ErrorResponse.of(ex.getErrorCode(), request.getRequestURI(), null));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -40,7 +48,7 @@ public class ExceptionController {
 			final MethodArgumentNotValidException ex, HttpServletRequest request) {
 		log.error("MethodArgumentNotValidException 발생: {}", ex.getMessage());
 		return ResponseEntity.status(ErrorCode.INVALID_INPUT.getHttpStatus())
-				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI()));
+				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI(), null));
 	}
 
 	@ExceptionHandler(JsonParseException.class)
@@ -48,7 +56,7 @@ public class ExceptionController {
 			JsonParseException ex, HttpServletRequest request) {
 		log.error("JsonParseException 발생: {}", ex.getMessage());
 		return ResponseEntity.status(ErrorCode.INVALID_JSON_FORMAT.getHttpStatus())
-				.body(ErrorResponse.of(ErrorCode.INVALID_JSON_FORMAT, request.getRequestURI()));
+				.body(ErrorResponse.of(ErrorCode.INVALID_JSON_FORMAT, request.getRequestURI(), null));
 	}
 
 	@ExceptionHandler(InvalidFormatException.class)
@@ -56,7 +64,7 @@ public class ExceptionController {
 			InvalidFormatException ex, HttpServletRequest request) {
 		log.error("InvalidFormatException 발생: {}", ex.getMessage());
 		return ResponseEntity.status(ErrorCode.INVALID_INPUT.getHttpStatus())
-				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI()));
+				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI(), null));
 	}
 
 	@ExceptionHandler(DateTimeParseException.class)
@@ -64,7 +72,7 @@ public class ExceptionController {
 			DateTimeParseException ex, HttpServletRequest request) {
 		log.error("DateTimeParseException 발생: {}", ex.getMessage());
 		return ResponseEntity.status(ErrorCode.INVALID_INPUT.getHttpStatus())
-				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI()));
+				.body(ErrorResponse.of(ErrorCode.INVALID_INPUT, request.getRequestURI(), null));
 	}
 
 	@ExceptionHandler(Exception.class)

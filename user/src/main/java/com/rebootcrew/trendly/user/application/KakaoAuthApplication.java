@@ -15,8 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.rebootcrew.trendly.common.exception.ErrorCode.USER_ALREADY_DELETED_EXPIRED;
 
 @Slf4j
 @Service
@@ -57,7 +61,6 @@ public class KakaoAuthApplication {
 
 		// 2. 사용자 정보 조회
 		KakaoUserResponse userInfo = kakaoService.getUserInfo(accessToken);
-		kakaoService.getUserServiceTerms(accessToken, userInfo);
 
 		// 3. DB에서 이메일 조회 (findByEmail 한 번만 실행!)
 		// 삭제 이력이 없는 계정이 있는지 확인
@@ -84,18 +87,25 @@ public class KakaoAuthApplication {
 			User user = deletedUser.get();
 
 			// 탈퇴한 경우 -> 7일 내인지 확인
-			LocalDateTime now = LocalDateTime.now();
-			LocalDateTime deletedAtPlus7days = user.getDeletedAt().plusDays(7);
+			LocalDate now = LocalDate.now();
+			LocalDate rejoinAvilableAt = user.getDeletedAt().toLocalDate().plusDays(7);
 
-			if (now.isAfter(deletedAtPlus7days)) {
+//			LocalDateTime now = LocalDateTime.now();
+//			LocalDateTime deletedAtPlus7days = user.getDeletedAt().plusDays(7);
+
+			if (now.isAfter(rejoinAvilableAt)) {
 				// 회원가입 처리 (재가입)
 				return authService.signUpUser(userInfo);
 			} else {
-				throw new CustomException(ErrorCode.USER_ALREADY_DELETED_EXPIRED);
+				kakaoService.kakaoUnlinck(userInfo.getId());
+				throw new CustomException(USER_ALREADY_DELETED_EXPIRED,
+						Map.of("rejoinAvailableAt", rejoinAvilableAt)
+				);
 			}
 		}
 
 		// 4-3. active한 계정도, 삭제 기록도 없는 경우 -> 신규 회원가입
+//		kakaoService.getUserServiceTerms(accessToken, userInfo);
 		return authService.signUpUser(userInfo);
 	}
 

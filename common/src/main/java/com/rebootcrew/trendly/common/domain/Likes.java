@@ -1,27 +1,28 @@
 package com.rebootcrew.trendly.common.domain;
 
+import com.rebootcrew.trendly.common.domain.enums.LikeType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.AuditOverride;
 
 @Entity
 @Builder
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@AuditOverride
-public class Likes extends BaseEntity {
+public class Likes {
+
 	@Id
-	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
-	@Column(name = "target_id", nullable = false)
-	private	Long targetId;
-	@Column(name = "target_type", nullable = false)
-	private String targetType;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private User user;
 
-	@Column(name = "is_liked", nullable = false)
-	private Boolean isLiked;
+	@Column(nullable = false)
+	private Long targetId;
+
+	@Enumerated(EnumType.STRING)
+	private LikeType targetType;
+
+	private boolean isLiked = Boolean.TRUE;
 }

@@ -1,13 +1,20 @@
 package com.rebootcrew.trendly.user.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebootcrew.trendly.common.exception.ErrorCode;
-import com.rebootcrew.trendly.common.exception.UnauthorizedException;
+import com.rebootcrew.trendly.common.exception.JwtAuthenticationException;
 import com.rebootcrew.trendly.user.application.AuthApplication;
 import com.rebootcrew.trendly.user.application.KakaoAuthApplication;
-import com.rebootcrew.trendly.user.dto.AuthResponse;
+import com.rebootcrew.trendly.user.domain.AuthResponse;
+import com.rebootcrew.trendly.user.domain.UserDto;
+import com.rebootcrew.trendly.user.service.KakaoService;
+import com.rebootcrew.trendly.user.service.UserService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -19,7 +26,8 @@ public class KakaoAuthController {
 
 	private final KakaoAuthApplication kakaoAuthApplication;
 	private final AuthApplication authApplication;
-	private final ObjectMapper objectMapper;
+	private final UserService userService;
+	private final KakaoService kakaoService;
 
 	// ✅ 카카오 로그인 요청 → 카카오 로그인 URL 리턴
 	@GetMapping("/login")
@@ -28,22 +36,30 @@ public class KakaoAuthController {
 		return ResponseEntity.ok(kakaoAuthApplication.getKakaoLoginUrl());
 	}
 
+	@GetMapping("/frontCallback")
+	public ResponseEntity<AuthResponse> kakaoCallback(
+			@RequestParam("code") String code,
+			@Parameter(description = "프론트에서 전달하는 리다이렉트 URL", required = true, example = "http://localhost:8080/auth/kakao/callback")
+			@RequestParam("redirect_uri") String redirectUrl) throws IOException {
+
+		return ResponseEntity.ok(kakaoAuthApplication.handleKakaoCallback(code, redirectUrl));
+	}
+
 	// ✅ 카카오 콜백 처리 (인가 코드 -> 토큰, 사용자 정보 조회 -> 로그인/회원가입)
 	@GetMapping("/callback")
 	public ResponseEntity<AuthResponse> kakaoCallback(
-	// TODO : AuthResponse 객체 변경됨에 따라 API 명세 수정
 			@RequestParam("code") String code) throws IOException {
 
-		return ResponseEntity.ok(kakaoAuthApplication.handleKakaoCallback(code));
+		String redirectUrl = null;
+		return ResponseEntity.ok(kakaoAuthApplication.handleKakaoCallback(code, redirectUrl));
 	}
 
-	// TODO : 추후에 AuthController 생성시 이동
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
 		String token = authHeader.replace("Bearer ", "").trim();
 
 		if (token == null) {
-			throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+			throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN);
 		}
 
 		// 로그아웃
@@ -51,6 +67,19 @@ public class KakaoAuthController {
 
 		return ResponseEntity.ok("로그아웃 성공");
 	}
+
+	// 카카오 연결 끊기
+	@GetMapping("/unlink")
+	public ResponseEntity<?> unlink(@AuthenticationPrincipal UserDetails userDetails) throws JsonProcessingException {
+		Long userId = Long.parseLong(userDetails.getUsername());
+
+		UserDto userInfo = userService.getUserInfo(userId);
+		// 카카오에게 유저 정보를 통해 연결 끊기
+		kakaoService.kakaoUnlinck(userInfo.getKakaoUserId());
+
+		return ResponseEntity.ok("카카오 연결 끊기 성공");
+	}
+
 
 //	/**
 //	 * 카카오계정과 함께 로그아웃 API

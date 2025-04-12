@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Getter
+@Getter @Setter
 @MappedSuperclass
 @EntityListeners(value = {AuditingEntityListener.class})
 public abstract class BaseEntity {
@@ -18,7 +18,7 @@ public abstract class BaseEntity {
 	private LocalDateTime createdAt;
 
 	@LastModifiedDate
-	@Column(name = "updated_at")
+	@Column(name = "updated_at", nullable = true)
 	private LocalDateTime updatedAt;
 
 }

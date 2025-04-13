@@ -1,6 +1,7 @@
 package com.rebootcrew.trendly.domain;
 
 import com.rebootcrew.trendly.common.domain.BaseEntity;
+import com.rebootcrew.trendly.domain.enums.Platform;
 import jakarta.persistence.*;
 import lombok.*;
 

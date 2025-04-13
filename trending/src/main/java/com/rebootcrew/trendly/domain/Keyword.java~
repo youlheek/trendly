@@ -4,10 +4,23 @@ import java.util.List;
 import java.util.Set;
 
 import com.rebootcrew.trendly.common.domain.BaseEntity;
-import com.rebootcrew.trendly.discussion.domain.ChatRoom;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,8 +59,8 @@ public class Keyword extends BaseEntity {  //BaseEntity 상속
     @Column(name = "negative_count")
     private Integer negativeCount;
 
-    @OneToOne(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private ChatRoom chatRoom;
+    @Transient
+    private com.rebootcrew.trendly.discussion.domain.ChatRoom chatRoom;
 
     // =============== 1:N (KeywordPlatform) ===============
     // "keyword_id"를 FK로 갖는 KeywordPlatform들을 관리

@@ -85,14 +85,14 @@ public class TrendingController {
 //        return ResponseEntity.ok(trendingService.getKeywordDetail(keywordId));
 //    }
 
-//    /** 키워드 검색 */
-//    @GetMapping("/keywords/search")
-//    public CompletableFuture<ResponseEntity<KeywordResponseDto>> searchKeywords(
-//            @RequestParam String keyword,
-//            @RequestParam(required = false) KeywordCategory category) {
-//        return trendingService.searchKeyword(keyword)
-//                .thenApply(ResponseEntity::ok); // 비동기 응답 처리
-//    }
+    /** 키워드 검색 */
+    @GetMapping("/keywords/search")
+    public CompletableFuture<ResponseEntity<KeywordResponseDto>> searchKeywords(
+            @RequestParam String keyword,
+            @RequestParam(required = false) KeywordCategory category) {
+        return trendingService.searchKeyword(keyword)
+                .thenApply(ResponseEntity::ok); // 비동기 응답 처리
+    }
 
 //    /** 키워드와 관련된 채팅방 조회 */
 //    @GetMapping("/keywords/chat/{keywordId}")

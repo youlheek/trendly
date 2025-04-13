@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "keyword_platform")
@@ -31,6 +33,38 @@ public class KeywordPlatform extends BaseEntity {  // BaseEntity 상속
 
     @Column(name = "first_seen_at", nullable = true)  // 최초 감지 시간 유지
     private LocalDateTime firstSeenAt;
+
+
+    // =============== 1:N (KeywordPlatformRanking) ===============
+    @OneToMany(mappedBy = "keywordPlatform", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<KeywordPlatformRanking> rankings = new ArrayList<>();
+
+    // =============== 1:N (KeywordPlatformStats) ===============
+    @OneToMany(mappedBy = "keywordPlatform", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<KeywordPlatformStats> stats = new ArrayList<>();
+
+    // 편의 메서드 (연관관계 동기화)
+    public void addRanking(KeywordPlatformRanking ranking) {
+        rankings.add(ranking);
+        ranking.setKeywordPlatform(this);
+    }
+
+    public void removeRanking(KeywordPlatformRanking ranking) {
+        rankings.remove(ranking);
+        ranking.setKeywordPlatform(null);
+    }
+
+    public void addStats(KeywordPlatformStats stat) {
+        stats.add(stat);
+        stat.setKeywordPlatform(this);
+    }
+
+    public void removeStats(KeywordPlatformStats stat) {
+        stats.remove(stat);
+        stat.setKeywordPlatform(null);
+    }
 
     // created_at을 오버라이드하여 DB에서 제외 (중요!)
     @Override

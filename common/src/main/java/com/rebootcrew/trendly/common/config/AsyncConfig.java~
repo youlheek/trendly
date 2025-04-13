@@ -8,16 +8,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 
 @Configuration
-@EnableAsync
+@EnableAsync  // 필수: @Async 비동기 처리를 활성화
 public class AsyncConfig {
 
-    @Bean(name = "asyncExecutor")
-    public Executor asyncExecutor() {
+    @Bean(name = "taskExecutor")
+    public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);  // 원하는 수 조절
-        executor.setMaxPoolSize(20);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("Trend-Async-");
+
+        // 💡 적절한 스레드 풀 사이즈 설정
+        executor.setCorePoolSize(5);             // 기본 스레드 수
+        executor.setMaxPoolSize(10);             // 최대 스레드 수
+        executor.setQueueCapacity(500);          // 대기 큐 크기
+        executor.setThreadNamePrefix("async-");  // 디버깅 시 유용
+
         executor.initialize();
         return executor;
     }

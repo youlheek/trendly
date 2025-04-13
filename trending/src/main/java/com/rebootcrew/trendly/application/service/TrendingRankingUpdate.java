@@ -1,4 +1,0 @@
-package com.rebootcrew.trendly.application.service;
-
-public class TrendingRankingUpdate {
-}

@@ -1,0 +1,9 @@
+package com.rebootcrew.trendly.application.dto;
+
+import lombok.Data;
+
+@Data
+public class KeywordTrendJsonDto {
+    private String type;
+    private List<KeywordContent> contents;
+}

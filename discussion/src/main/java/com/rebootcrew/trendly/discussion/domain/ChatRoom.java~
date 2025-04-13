@@ -4,8 +4,6 @@ import com.rebootcrew.trendly.common.domain.enums.ChatRoomStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import com.rebootcrew.trendly.domain.Keyword;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +20,8 @@ public class ChatRoom {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "keyword_id2", referencedColumnName = "keyword_id", nullable = false)
-	private Keyword keyword;
+	@Column(name = "keyword_id", nullable = false)
+	private Long keywordId;
 
 	@Enumerated(EnumType.STRING) // enum 을 문자열로 저장
 	@Column(nullable = false)

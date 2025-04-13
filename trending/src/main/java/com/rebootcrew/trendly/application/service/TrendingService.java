@@ -2,9 +2,12 @@ package com.rebootcrew.trendly.application.service;
 
 import com.rebootcrew.trendly.application.TrendingMapper;
 import com.rebootcrew.trendly.application.dto.KeywordRankingListResponseDto;
+import com.rebootcrew.trendly.application.dto.KeywordRankingRequestDto;
 import com.rebootcrew.trendly.application.dto.KeywordRankingResponseDto;
 import com.rebootcrew.trendly.application.dto.KeywordResponseDto;
 import com.rebootcrew.trendly.domain.Keyword;
+import com.rebootcrew.trendly.domain.KeywordPlatform;
+import com.rebootcrew.trendly.domain.KeywordPlatformRanking;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
 import com.rebootcrew.trendly.domain.enums.Platform;
 import com.rebootcrew.trendly.repository.KeywordPlatformRankingRepository;
@@ -25,55 +28,51 @@ public class TrendingService {
     private final KeywordPlatformRankingRepository keywordPlatformRankingRepository;
     private final KeywordRepository keywordRepository;
     private final TrendingMapper trendingMapper;
-
-    public List<KeywordRankingResponseDto> getRealtimeByFilterHours(
-            int times, Platform platform,
-            KeywordCategory category,
-            LocalDateTime currentTime) {
-
-        // 현재 시간에서 4시간 전 시간 계산
-        LocalDateTime startTime = LocalDateTime.now().minusHours(times);
-        LocalDateTime endTime = LocalDateTime.now();
-
-        // DB에서 최근 4시간 동안의 키워드 검색량 필터링
-        return keywordRankingRepository.findByTimeRange(startTime, endTime, platform, category);
-    }
-
+    private final KeywordPlatformRankingRepository keywordRankingRepository;
 
     @Async("customTaskExecutor") // 특정 Executor 지정 가능
     public CompletableFuture<List<KeywordResponseDto>> getAllKeywords() {
         return keywordRepository.findAllAsync()
                 .thenApply(keywords -> keywords.stream()
-                        .map(TrendingMapper::toKeywordResponseDto)
+                        .map(trendingMapper::toKeywordResponseDto)
                         .collect(Collectors.toList()));
     }
 
-    public List<KeywordRankingResponseDto> getKeywords(KeywordCategory category, Platform platform){
-        return;
-    }
+//    public List<KeywordRankingResponseDto> getKeywords(KeywordCategory category, Platform platform){
+//        List<Keyword> keywords = keywordRepository.findAllByCategoriesContaining(category.toString()).get();
+//        return;
+//    }
 
     public KeywordRankingListResponseDto getRealtimeByFilterDays(
-            int days,
-            Platform platform,
-            KeywordCategory category,
-            LocalDateTime currentTime) {
-        // 7일 전부터 현재까지 조회
+            KeywordRankingRequestDto rankingRequestDto) {
+
+        int days = rankingRequestDto.getDays();
+        Platform platform = rankingRequestDto.getPlatform();
+        KeywordCategory category = rankingRequestDto.getCategory();
+
+        // *일 전부터 현재까지 조회
         LocalDateTime startTime = LocalDateTime.now().minusDays(days);
         LocalDateTime endTime = LocalDateTime.now();
 
-        // 7일간의 데이터를 조회
-        List<KeywordRankingResponseDto> rankings = keywordRankingRepository.findByTimeRange(startTime, endTime, platform, category);
+//        List<KeywordPlatformRanking> rankingss =
+//                keywordRankingRepository
+//                        .findAllByPlatformAndCategoriesAndPeriodsFileter(platform, category, startTime, endTime)
+//                        .join(); // 혹은 .get()
 
-        return new KeywordRankingListResponseDto(rankings);
+        // *일간의 데이터를 조회
+        CompletableFuture<List<KeywordRankingResponseDto>> keywordRankingResponseDtos = keywordRankingRepository.findRankingDtos(platform, category, startTime, endTime);
+        List<KeywordRankingResponseDto> rankings = keywordRankingResponseDtos.join();
+
+        return (trendingMapper.toRankingListResponseDto(rankingRequestDto, rankings, days));
     }
 
-    /** 비동기 키워드 검색 */
-    @Async
-    public CompletableFuture<KeywordResponseDto> searchKeyword(String keyword) {
-        return keywordRepository.findByKeywordName(keyword) // 비동기 데이터 조회
-                .thenApply(optionalKeyword -> optionalKeyword
-                        .map(TrendingMapper::toKeywordResponseDto) // DTO 변환
-                        .orElseThrow(() -> new RuntimeException("Keyword not found: " + keyword))); // 예외 처리
-    }
+//    /** 비동기 키워드 검색 */
+//    @Async
+//    public CompletableFuture<KeywordResponseDto> searchKeyword(String keyword) {
+//        return keywordRepository.findByKeywordName(keyword) // 비동기 데이터 조회
+//                .thenApply(optionalKeyword -> optionalKeyword
+//                        .map(TrendingMapper::toKeywordResponseDto) // DTO 변환
+//                        .orElseThrow(() -> new RuntimeException("Keyword not found: " + keyword))); // 예외 처리
+//    }
 
 }

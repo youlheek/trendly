@@ -41,7 +41,7 @@ spring:
   # JPA ??
   jpa:
     hibernate:
-      ddl-auto: create  # ?????? ???? ????? ??
+      ddl-auto: update  # ?????? ???? ????? ??
     database-platform: org.hibernate.dialect.MySQLDialect  # MySQL? ?? Hibernate ?? ??
     show-sql: true  # SQL ?? ?? ???
     properties:
@@ -72,12 +72,27 @@ jwt:
   secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
   # 원본 값 사용
   access-token:
-    expiration: 180000                       # 원본 값 사용
+    expiration: 3600000  # 1시간 (1h = 60 * 60 * 1000ms)
   refresh-token:
-    expiration: 300000                       # 원본 값 사용
+    expiration: 86400000 # 24시간 (24h = 24 * 60 * 60 * 1000ms)
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: env
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: env
+
+# 로그 설정
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket.handler: TRACE
+    org.hibernate:
+      SQL: DEBUG
+      type:
+        descriptor:
+          sql:
+            BasicBinder: TRACE
+    com.rebootcrew.trendly: DEBUG

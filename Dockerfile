@@ -23,8 +23,7 @@ RUN gradle bootJar --no-daemon
 # 베이스 이미지로 OpenJDK 17 사용
 FROM openjdk:17-slim
 
-# 빌드 결과물 복사 (user의 bootJar 결과물)
-#터미널에서 C:\Users\LG\Desktop\trendly 디렉토리에서 docker build 명령어를 실행하면, 이 폴더가 빌드 컨텍스트의 루트가 됩니다.
+# 빌드 결과물 복사
 COPY docker-compose.yml /app/docker-compose.yml
 COPY .env /app/.env
 COPY --from=builder /home/app/build/libs/*.jar trendly.jar

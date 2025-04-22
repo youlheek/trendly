@@ -1,6 +1,5 @@
 package com.rebootcrew.trendly.repository;
 
-
 import com.rebootcrew.trendly.domain.Keyword;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +12,8 @@ import java.util.concurrent.CompletableFuture;
 
 @Repository
 public interface KeywordRepository extends JpaRepository<Keyword, Long> {
+
+    Optional<Keyword> findById(Long id);
 
     @Async
     CompletableFuture<List<Keyword>> findAllAsync();

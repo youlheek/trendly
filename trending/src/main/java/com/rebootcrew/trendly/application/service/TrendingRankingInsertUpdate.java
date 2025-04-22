@@ -112,7 +112,7 @@ public class TrendingRankingInsertUpdate {
     private void createKeywordPlatformRanking(KeywordPlatform keywordPlatform) {
         KeywordPlatformRanking ranking = KeywordPlatformRanking.builder()
                 .keywordPlatform(keywordPlatform)
-                .rank(0) // 초기 랭크는 0 (향후 계산 가능)
+                .ranking(0) // 초기 랭크는 0 (향후 계산 가능)
                 .previousRank(null)
                 .build();
         keywordPlatformRankingRepository.save(ranking);
@@ -133,6 +133,15 @@ public class TrendingRankingInsertUpdate {
         }, asyncExecutor).thenCompose(this::insertFromKeywordContentAsync); // 비동기 조합
 
     }
+
+//    public void deleteKeyword(Long keywordId) {
+//        ChatRoom chatRoom = chatRoomRepository.findByKeywordId(keywordId);
+//        if (chatRoom != null) {
+//            chatRoomRepository.delete(chatRoom);
+//        }
+//        keywordRepository.deleteById(keywordId);
+//    }
+
 
 //    public void insertGoogleList() {
 //        externalApiService.getKeywordRank(FastApiEndpoints.TOP_GOOGLE);

@@ -1,45 +1,47 @@
 package com.rebootcrew.trendly.discussion.service;
 
-import com.rebootcrew.trendly.common.domain.User;
-import com.rebootcrew.trendly.common.domain.enums.ChatRoomStatus;
-import com.rebootcrew.trendly.discussion.domain.dto.ChatRoomDto;
-import com.rebootcrew.trendly.common.exception.CustomException;
-import com.rebootcrew.trendly.discussion.domain.ChatRoom;
-import com.rebootcrew.trendly.discussion.domain.ChatRoomMember;
-import com.rebootcrew.trendly.discussion.domain.dto.ChatRoomMemberDto;
-import com.rebootcrew.trendly.discussion.domain.dto.NicknameDto;
-import com.rebootcrew.trendly.discussion.domain.service.ChatRoomValidator;
-import com.rebootcrew.trendly.discussion.repository.ChatRoomMemberRepository;
-import com.rebootcrew.trendly.discussion.repository.ChatRoomRepository;
-import com.rebootcrew.trendly.domain.Keyword;
-import com.rebootcrew.trendly.trending.repository.KeywordRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.rebootcrew.trendly.repository.KeywordRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.rebootcrew.trendly.common.exception.ErrorCode.*;
+import com.rebootcrew.trendly.common.domain.User;
+import com.rebootcrew.trendly.common.domain.enums.ChatRoomStatus;
+import com.rebootcrew.trendly.common.exception.CustomException;
+import static com.rebootcrew.trendly.common.exception.ErrorCode.ALREADY_JOINED;
+import static com.rebootcrew.trendly.common.exception.ErrorCode.ALREADY_USED_NICKNAME;
+import static com.rebootcrew.trendly.common.exception.ErrorCode.NICKNAME_TOO_LONG;
+import static com.rebootcrew.trendly.common.exception.ErrorCode.NOT_FOUND_ACTIVE_CHAT_ROOM_MEMBER;
+import static com.rebootcrew.trendly.common.exception.ErrorCode.NOT_FOUND_ROOM;
+import com.rebootcrew.trendly.discussion.domain.ChatRoom;
+import com.rebootcrew.trendly.discussion.domain.ChatRoomMember;
+import com.rebootcrew.trendly.discussion.domain.dto.ChatRoomDto;
+import com.rebootcrew.trendly.discussion.domain.dto.ChatRoomMemberDto;
+import com.rebootcrew.trendly.discussion.domain.dto.NicknameDto;
 import static com.rebootcrew.trendly.discussion.domain.enums.ChatRoomMemeberStatus.ACTIVE;
 import static com.rebootcrew.trendly.discussion.domain.enums.ChatRoomMemeberStatus.LEFT;
+import com.rebootcrew.trendly.discussion.domain.service.ChatRoomValidator;
+import com.rebootcrew.trendly.discussion.repository.ChatRoomMemberRepository;
+import com.rebootcrew.trendly.discussion.repository.ChatRoomRepository;
+import com.rebootcrew.trendly.domain.Keyword;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
 
-	private final KeywordRepository keywordRepository;
 	private final ChatRoomRepository chatRoomRepository;
-	private final SimpMessagingTemplate messagingTemplate; // 다른곳(예: 웹 브라우저)으로 메시지를 보내는 도구
+	private final SimpMessagingTemplate messagingTemplate;
 	private final ChatRoomMemberRepository chatRoomMemberRespository;
 	private final ChatRoomValidator chatRoomValidator;
 	private final ChatRoomMemberRepository chatRoomMemberRepository;
-
+	private final KeywordRepository keywordRepository;
 
 	/**
 	 * 채팅방 초기 생성 및 상태 변경
@@ -48,13 +50,12 @@ public class ChatRoomService {
 	 * @return
 	 */
 	public ChatRoomDto handleChatRoom(ChatRoomDto chatRoomDto) {
+		// 기존 채팅방 확인
+		Optional<ChatRoom> existingRoom = chatRoomRepository.findByKeywordId(chatRoomDto.getKeywordId());
 		// Keyword 존재 확인
 		Keyword keyword = keywordRepository.findById(chatRoomDto.getKeywordId())
 				.orElseThrow(() -> new IllegalArgumentException("Keyword not found"));
 
-		// 기존 채팅방 확인
-		Optional<ChatRoom> existingRoom =
-				chatRoomRepository.findByKeywordId(chatRoomDto.getKeywordId());
 		ChatRoom chatRoom;
 
 		if (existingRoom.isPresent()) {

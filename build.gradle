@@ -116,8 +116,8 @@ subprojects {
         // Redis 데이터베이스 지원 (Redis를 통한 캐시, 데이터 저장 등에 사용)
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-        // MongoDB 데이터베이스 지원 (MongoDB와의 통합 및 데이터 처리)
-        implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+//        // MongoDB 데이터베이스 지원 (MongoDB와의 통합 및 데이터 처리)
+//        implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
         // Spring Batch를 사용하여 대량의 데이터 처리를 위한 배치 처리 기능 제공
         implementation 'org.springframework.boot:spring-boot-starter-batch'

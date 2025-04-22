@@ -1,19 +1,20 @@
 package com.rebootcrew.trendly.discussion.domain;
 
 import com.rebootcrew.trendly.common.domain.enums.ChatRoomStatus;
+import com.rebootcrew.trendly.domain.Keyword;
+
 import jakarta.persistence.*;
 import lombok.*;
-
-import com.rebootcrew.trendly.domain.Keyword;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Builder
+@Table(name = "chat_rooms")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@Builder
 public class ChatRoom {
 
 	@Id
@@ -22,7 +23,7 @@ public class ChatRoom {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "keyword_id2", referencedColumnName = "keyword_id", nullable = false)
+	@JoinColumn(name = "keyword_id", nullable = false)
 	private Keyword keyword;
 
 	@Enumerated(EnumType.STRING) // enum 을 문자열로 저장
@@ -33,8 +34,8 @@ public class ChatRoom {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
-	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
-	// CascadeType.ALL : chatRoom.getMembers().add(newMember)만으로 newMember(ChatRoomMember)가 저장
+
+	@OneToMany(mappedBy = "chatRoom")
 	private List<ChatRoomMember> members = new ArrayList<>();
 
 }

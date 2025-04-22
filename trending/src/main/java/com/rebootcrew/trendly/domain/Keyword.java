@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.rebootcrew.trendly.common.domain.BaseEntity;
-import com.rebootcrew.trendly.discussion.domain.ChatRoom;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
 
 import jakarta.persistence.*;
@@ -21,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Keyword extends BaseEntity {  //BaseEntity 상속
+public class Keyword extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +34,7 @@ public class Keyword extends BaseEntity {  //BaseEntity 상속
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "keyword_category", joinColumns = @JoinColumn(name = "keyword_id"))
     @Column(name = "category")
-    private Set<KeywordCategory> categories;  // ENUM SET (카테고리)
+    private Set<KeywordCategory> categories;
 
     @Column(name = "positive_count")
     private Integer positiveCount;
@@ -45,30 +44,5 @@ public class Keyword extends BaseEntity {  //BaseEntity 상속
 
     @Column(name = "negative_count")
     private Integer negativeCount;
-
-    @OneToOne(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private ChatRoom chatRoom;
-
-    // =============== 1:N (KeywordPlatform) ===============
-    // "keyword_id"를 FK로 갖는 KeywordPlatform들을 관리
-    // cascade = ALL -> 키워드 생성/삭제 시 플랫폼들도 자동 전이
-    // orphanRemoval = true -> 목록에서 제거하면 DB에서도 제거
-    @OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<KeywordPlatform> platforms = new ArrayList<>();
-
-    /**
-     * 연관관계 편의 메서드 (권장)
-     * - Platform 추가 시 양방향 관계 유지
-     */
-    public void addPlatform(KeywordPlatform platform) {
-        platforms.add(platform);
-        platform.setKeyword(this);
-    }
-
-    public void removePlatform(KeywordPlatform platform) {
-        platforms.remove(platform);
-        platform.setKeyword(null);
-    }
 
 }

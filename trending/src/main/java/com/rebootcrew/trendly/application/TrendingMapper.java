@@ -84,7 +84,7 @@ public class TrendingMapper {
         return KeywordRankingResponseDto.builder()
                 .id(entity.getKeywordPlatform().getKeyword().getId())
                 .keywordName(entity.getKeywordPlatform().getKeyword().toString())
-                .rank(entity.getRank())
+                .rank(entity.getRanking())
                 .volume(searchVolume)
                 .roomId(roomId)
                 .build();

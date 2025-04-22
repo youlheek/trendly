@@ -24,11 +24,14 @@ public class KeywordPlatformRanking extends BaseEntity {
     @JoinColumn(name = "keyword_platform_id", nullable = false)
     private KeywordPlatform keywordPlatform;
 
-    @Column(name = "keyword_platform_id", nullable = false)
+    @Column(name = "keyword_platform_id",
+            nullable = false,
+            insertable = false,
+            updatable = false)
     private Long platformKeywordId;
 
-    @Column(name = "rank", nullable = false)
-    private Integer rank;
+    @Column(name = "ranking", nullable = false)
+    private Integer ranking;
 
     @Column(name = "previous_rank")
     private Integer previousRank;

@@ -24,7 +24,7 @@ spring:
         matching-strategy: ant_path_matcher    # 원본 값 사용
   # ?????? ??
   datasource:
-    url: jdbc:mysql://${server.base-url}:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL ?????? ?? URL
+    url: jdbc:mysql://mysql-db:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
     username: ${PUBLIC_NAME:trendly}
     password: ${PUBLIC_PASSWORD:rootroot}
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC ???? ???
@@ -39,14 +39,13 @@ spring:
 
   # JPA ??
   jpa:
-    hibernate:
-      ddl-auto: create  # ?????? ???? ????? ??
     database-platform: org.hibernate.dialect.MySQLDialect  # MySQL? ?? Hibernate ?? ??
+    hibernate:
+      ddl-auto: update
     show-sql: true  # SQL ?? ?? ???
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
 
   data:
     redis:
@@ -78,9 +77,13 @@ jwt:
   secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
   # 원본 값 사용
   access-token:
-    expiration: 180000                       # 원본 값 사용
+    expiration: 200000                       # 원본 값 사용
   refresh-token:
-    expiration: 300000                       # 원본 값 사용
+    expiration: 2900000                       # 원본 값 사용
+
+springdoc:
+  swagger-ui:
+    display-request-duration: true
 
 management:
   endpoints:

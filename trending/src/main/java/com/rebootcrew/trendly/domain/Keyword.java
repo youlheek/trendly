@@ -1,8 +1,8 @@
 package com.rebootcrew.trendly.domain;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
 import com.rebootcrew.trendly.common.domain.BaseEntity;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
 
@@ -34,15 +34,19 @@ public class Keyword extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "keyword_category", joinColumns = @JoinColumn(name = "keyword_id"))
     @Column(name = "category")
-    private Set<KeywordCategory> categories;
+    @Builder.Default
+    private Set<KeywordCategory> categories = EnumSet.of(KeywordCategory.전체);
 
     @Column(name = "positive_count")
-    private Integer positiveCount;
+    @Builder.Default
+    private Integer positiveCount=0;
 
     @Column(name = "neutral_count")
-    private Integer neutralCount;
+    @Builder.Default
+    private Integer neutralCount=0;
 
     @Column(name = "negative_count")
-    private Integer negativeCount;
+    @Builder.Default
+    private Integer negativeCount=0;
 
 }

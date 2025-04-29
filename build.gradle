@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.2'
+    id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -35,7 +35,7 @@ dependencies {
     implementation 'org.springframework.data:spring-data-envers'
 
     // swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
     // spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -44,23 +44,19 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // MySQL
-    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
-
     implementation 'org.springframework.security:spring-security-messaging'
-
 }
-
 
 subprojects {
     // 모든 하위 프로젝트에 다음 플러그인을 공통 적용
@@ -91,7 +87,7 @@ subprojects {
         implementation 'org.springframework.data:spring-data-envers'
 
         // swagger
-        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 
         // spring security
         implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -137,8 +133,27 @@ subprojects {
 
 
     }
-
     tasks.named('test') {
         useJUnitPlatform()
+    }
+}
+
+// trendly 모듈에 대한 특별 설정
+project(':trendly') {
+    bootJar {
+        enabled = true
+        mainClass = 'com.rebootcrew.trendly.trendly.TrendlyApplication'
+    }
+}
+
+// 다른 모듈은 라이브러리로 설정
+subprojects {
+    if (project.name != 'trendly') {
+        bootJar {
+            enabled = false
+        }
+        jar {
+            enabled = true
+        }
     }
 }

@@ -15,23 +15,26 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Component
 public class TrendingMapper {
 
     public KeywordResponseDto toKeywordResponseDto(Keyword keyword) {
+        Set<KeywordCategory> categoriesSafe =
+                Optional.ofNullable(keyword.getCategories())
+                        .map(c -> new HashSet<>(c))  // 타입 명확함
+                        .orElse(new HashSet<>());
+
         return KeywordResponseDto.builder()
                 .id(keyword.getId())
                 .keywordName(keyword.getKeywordName())
-                .categories(keyword.getCategories()) // 카테고리 추가
+                .categories(categoriesSafe)
                 .positiveCount(keyword.getPositiveCount())
                 .neutralCount(keyword.getNeutralCount())
                 .negativeCount(keyword.getNegativeCount())
-                .lastUpdatedAt(keyword.getUpdatedAt()) // 최종 업데이트 시간 추가
+                .lastUpdatedAt(keyword.getUpdatedAt())
                 .build();
     }
 

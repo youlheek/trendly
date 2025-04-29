@@ -1,10 +1,9 @@
 package com.rebootcrew.trendly.domain;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
 import com.rebootcrew.trendly.common.domain.BaseEntity;
-import com.rebootcrew.trendly.discussion.domain.ChatRoom;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
 
 import jakarta.persistence.*;
@@ -35,7 +34,7 @@ public class Keyword extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "keyword_category", joinColumns = @JoinColumn(name = "keyword_id"))
     @Column(name = "category")
-    private Set<KeywordCategory> categories;
+    private Set<KeywordCategory> categories = EnumSet.of(KeywordCategory.전체);
 
     @Column(name = "positive_count")
     private Integer positiveCount;
@@ -46,7 +45,4 @@ public class Keyword extends BaseEntity {
     @Column(name = "negative_count")
     private Integer negativeCount;
 
-    // Room과의 1:1 양방향 관계 설정
-    @OneToOne(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private ChatRoom chatRoom;
 }

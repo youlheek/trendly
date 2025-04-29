@@ -1,4 +1,4 @@
-version: '3.9'  # 최신 버전으로 업데이트
+version: '3.9'
 
 services:
   spring-boot-app:
@@ -6,14 +6,23 @@ services:
     image: youlhee/trendly:redis
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: "${PUBLIC_NAME}"
-      SPRING_DATASOURCE_PASSWORD: "${PUBLIC_PASSWORD}"
-      SPRING_RABBITMQ_HOST: "rabbitmq"
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
+      SPRING_PORT: ${SPRING_PORT}  # 서버 포트 지정
+
+      # Datasource 설정 (application-dev.yml에서 ${server.base-url}을 참조함)
+      PUBLIC_NAME: ${PUBLIC_NAME}
+      PUBLIC_PASSWORD: ${PUBLIC_PASSWORD}
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+
+      # RabbitMQ
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
     ports:
-      - "${SPRING_PORT}:${SPRING_PORT}"  # Spring Boot 서버 포트를 외부에 노출
+      - "${SPRING_PORT}:${SPRING_PORT}"
     depends_on:
       mysql-db:
         condition: service_healthy
@@ -21,19 +30,21 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_started
+
     networks:
-      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network
+
 
   mysql-db:
     image: mysql:8.0.33
     container_name: trendly-mysql
     environment:
-      - MYSQL_DATABASE=trendly
-      - MYSQL_USER=trendly
-      - MYSQL_PASSWORD=rootroot
-      - MYSQL_ROOT_PASSWORD=rootroot
+      - MYSQL_DATABASE=${MYSQL_DB_NAME}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -44,36 +55,16 @@ services:
       timeout: 5s
       retries: 5
 
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
-  #   container_name: elasticsearch
-  #   ports:
-  #     - "${ES_PORT}:${ES_PORT}"
-  #     - "${CLUSTER_ES_PORT}:${CLUSTER_ES_PORT}"
-  #   volumes:
-  #     - ./data/elasticsearch:/usr/share/elasticsearch/data
-  #   environment:
-  #     discovery.type: single-node
-  #     ELASTIC_USERNAME: "${PUBLIC_NAME}"  # 환경 변수 설정 필요
-  #     ELASTIC_PASSWORD: "${PUBLIC_PASSWORD}"
-  #     xpack.security.enabled: false
-  #     xpack.security.enrollment.enabled: false
-  #   networks:
-  #     - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
-  #   expose:
-  #     - "${ES_PORT}" ## - 외부 접속 시 REST API 호출을 위한 포트
-  #     - "${CLUSTER_ES_PORT}" ## - 클러스터 통신용 포트.
-
   redis:
     image: redis:7
     container_name: redis
     hostname: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis-data:/data
     networks:
-      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network
     restart: always
     command: redis-server --port 6379
 
@@ -81,21 +72,21 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"  # RabbitMQ 서버 포트
-      - "${RABBITMQ_MANAGEMENT_PORT}:${RABBITMQ_MANAGEMENT_PORT}"  # 관리 콘솔 포트
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+      - "${RABBITMQ_MANAGEMENT_PORT}:${RABBITMQ_MANAGEMENT_PORT}"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}  # 기본 사용자 이름
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}  # 기본 사용자 비밀번호
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - trendly-network  # 다른 서비스와 통신하기 위한 네트워크 연결
+      - trendly-network
 
 volumes:
-  db_data:  # MySQL 데이터
-  redis-data:  # Redis 데이터
-  rabbitmq_data:  # RabbitMQ 데이터
+  db_data:
+  redis-data:
+  rabbitmq_data:
 
 networks:
   trendly-network:
-    driver: bridge
+    external: true

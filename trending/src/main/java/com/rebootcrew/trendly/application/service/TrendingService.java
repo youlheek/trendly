@@ -5,7 +5,6 @@ import com.rebootcrew.trendly.application.dto.KeywordRankingListResponseDto;
 import com.rebootcrew.trendly.application.dto.KeywordRankingRequestDto;
 import com.rebootcrew.trendly.application.dto.KeywordRankingResponseDto;
 import com.rebootcrew.trendly.application.dto.KeywordResponseDto;
-import com.rebootcrew.trendly.domain.Keyword;
 import com.rebootcrew.trendly.domain.KeywordPlatform;
 import com.rebootcrew.trendly.domain.KeywordPlatformRanking;
 import com.rebootcrew.trendly.domain.enums.KeywordCategory;
@@ -15,6 +14,7 @@ import com.rebootcrew.trendly.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TrendingService {
 
     private final KeywordPlatformRankingRepository keywordPlatformRankingRepository;
@@ -30,7 +31,8 @@ public class TrendingService {
     private final TrendingMapper trendingMapper;
     private final KeywordPlatformRankingRepository keywordRankingRepository;
 
-    @Async("customTaskExecutor") // 특정 Executor 지정 가능
+    @Async("customTaskExecutor")
+    @Transactional(readOnly = true)
     public CompletableFuture<List<KeywordResponseDto>> getAllKeywords() {
         return keywordRepository.findAllAsync()
                 .thenApply(keywords -> keywords.stream()
@@ -60,8 +62,7 @@ public class TrendingService {
 //                        .join(); // 혹은 .get()
 
         // *일간의 데이터를 조회
-        CompletableFuture<List<KeywordRankingResponseDto>> keywordRankingResponseDtos = keywordRankingRepository.findRankingDtos(platform, category, startTime, endTime);
-        List<KeywordRankingResponseDto> rankings = keywordRankingResponseDtos.join();
+        List<KeywordRankingResponseDto> rankings = keywordRankingRepository.findRankingDtos(platform, category, startTime, endTime);
 
         return (trendingMapper.toRankingListResponseDto(rankingRequestDto, rankings, days));
     }

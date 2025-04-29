@@ -16,6 +16,7 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     Optional<Keyword> findById(Long id);
 
     @Async
+    @Query("SELECT k FROM Keyword k")
     CompletableFuture<List<Keyword>> findAllAsync();
 
     @Async

@@ -50,7 +50,9 @@ public class SecurityConfig {
 										"/v3/api-docs/**",
 										"/hello/**",
 										"/api/chat/rooms",
-										"/ws/**" // Websocket 엔드포인트 인증 제외
+										"/ws/**", // Websocket 엔드포인트 인증 제외
+										"/api/v1/trending/**",
+										"/api/v1/trending/*"
 								).permitAll()
 								.anyRequest().authenticated() // 그 외 요청은 인증 필요
 				)

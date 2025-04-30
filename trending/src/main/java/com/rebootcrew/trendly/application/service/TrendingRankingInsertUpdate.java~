@@ -55,6 +55,7 @@ public class TrendingRankingInsertUpdate {
 
                     List<FlatKeywordEntry> allEntries = new ArrayList<>();
 
+                    // ✅ top 데이터 처리
                     List<KeywordJsonContent> topRecords = trendingMapper.mapToKeywordRecords(topNode, "total");
                     for (KeywordJsonContent record : topRecords) {
                         String date = record.getDate();
@@ -65,6 +66,7 @@ public class TrendingRankingInsertUpdate {
                         }
                     }
 
+                    // ✅ bottom 데이터 처리
                     List<KeywordJsonContent> bottomRecords = trendingMapper.mapToKeywordRecords(bottomNode, "total");
                     for (KeywordJsonContent record : bottomRecords) {
                         String date = record.getDate();
@@ -81,9 +83,10 @@ public class TrendingRankingInsertUpdate {
     }
 
     private CompletableFuture<Void> insertSortedEntries(List<FlatKeywordEntry> entries) {
+        // ✅ volume 기준으로 내림차순 정렬
         entries.sort((e1, e2) -> Integer.compare(e2.volume, e1.volume));
 
-        // ✅ 여기서 top10만 남긴다
+        // ✅ 상위 10개만 남긴다
         List<FlatKeywordEntry> top10Entries = entries.size() > 10 ? entries.subList(0, 10) : entries;
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -93,11 +96,8 @@ public class TrendingRankingInsertUpdate {
             final int assignedRank = rank++;
 
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                // ✅ Keyword를 이름으로 정확히 찾고
-                Keyword keyword = findOrCreateKeywordByName(entry.keywordName);
-
-                // ✅ 항상 (keyword + 날짜) 조합으로 새로 Platform을 생성
-                KeywordPlatform platform = createNewKeywordPlatform(keyword, entry.date);
+                Keyword keyword = findOrCreateKeyword(entry.keywordName);
+                KeywordPlatform platform = findOrCreateKeywordPlatform(keyword, entry.date);
 
                 createOrUpdateKeywordPlatformRanking(platform, assignedRank);
                 createKeywordPlatformStats(platform, keyword, entry.volume, entry.date);
@@ -110,7 +110,7 @@ public class TrendingRankingInsertUpdate {
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
     }
 
-    private Keyword findOrCreateKeywordByName(String keywordName) {
+    private Keyword findOrCreateKeyword(String keywordName) {
         return keywordRepository.findByKeywordName(keywordName)
                 .join()
                 .orElseGet(() -> keywordRepository.save(
@@ -124,16 +124,17 @@ public class TrendingRankingInsertUpdate {
                 ));
     }
 
-    // ✅ 항상 새로 KeywordPlatform 생성
-    private KeywordPlatform createNewKeywordPlatform(Keyword keyword, String date) {
+    private KeywordPlatform findOrCreateKeywordPlatform(Keyword keyword, String date) {
         LocalDateTime firstSeenAt = LocalDateTime.parse(date + "T00:00:00");
-        return keywordPlatformRepository.save(
-                KeywordPlatform.builder()
-                        .keyword(keyword)
-                        .platform(Platform.전체)
-                        .firstSeenAt(firstSeenAt)
-                        .build()
-        );
+
+        return keywordPlatformRepository.findByKeywordAndFirstSeenAt(keyword, firstSeenAt)
+                .orElseGet(() -> keywordPlatformRepository.save(
+                        KeywordPlatform.builder()
+                                .keyword(keyword)
+                                .platform(Platform.전체)
+                                .firstSeenAt(firstSeenAt)
+                                .build()
+                ));
     }
 
     private void createOrUpdateKeywordPlatformRanking(KeywordPlatform keywordPlatform, int currentRanking) {

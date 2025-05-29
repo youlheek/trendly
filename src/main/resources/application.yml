@@ -19,7 +19,7 @@ spring:
       pathmatch:
         matching-strategy: ant_path_matcher    # 원본 값 사용
   datasource:
-    url: jdbc:mysql://${server.base-url}:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL ?????? ?? URL
+    url: jdbc:mysql://localhost:3306/trendly?useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true  # MySQL ?????? ?? URL
     username: ${PUBLIC_NAME:trendly}
     password: ${PUBLIC_PASSWORD:rootroot}
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC ???? ???
@@ -35,9 +35,9 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: create  # 데이터베이스 스키마를 업데이트로 설정
-    database-platform: org.hibernate.dialect.MySQLDialect  # MySQL에 맞는 Hibernate 방언 설정
-    show-sql: true  # SQL 쿼리 로깅 활성화
+      ddl-auto: update  # ?????? ???? ????? ??
+    database-platform: org.hibernate.dialect.MySQLDialect  # MySQL? ?? Hibernate ?? ??
+    show-sql: true  # SQL ?? ?? ???
     properties:
       hibernate:
         format_sql: true  # SQL ?? ?? ??(???? ??)
@@ -47,7 +47,7 @@ spring:
         registration:
           kakao:
             client-id: 0ff4f0cc878339e75d6a7f55b88fa027
-            redirect-uri: http://${server.base-url}:8080/auth/kakao/callback
+            redirect-uri: http://localhost:8080/auth/kakao/callback
     #  # MongoDB ??
     #  data:
     #    mongodb:
@@ -68,6 +68,22 @@ rabbitmq:
 jwt:
   secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
   access-token:
-    expiration: 300000                       # 3m
+#    expiration: 3600000  # 1시간 (1h = 60 * 60 * 1000ms)
+    expiration: 86400000 # 24시간 (24h = 24 * 60 * 60 * 1000ms)
   refresh-token:
-    expiration: 300000
+    expiration: 86400000 # 24시간 (24h = 24 * 60 * 60 * 1000ms)
+
+# 로그 설정
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket.handler: TRACE
+    org.hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+    com.rebootcrew.trendly: DEBUG

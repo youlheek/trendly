@@ -58,3 +58,10 @@ spring:
     port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_DEFAULT_USER}
     password: ${PUBLIC_PASSWORD}  # .env에 없으므로 추가 필요
+
+jwt:
+  secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
+  access-token:
+    expiration: 3600000  # 1시간 (1h = 60 * 60 * 1000ms)
+  refresh-token:
+    expiration: 86400000 # 24시간 (24h = 24 * 60 * 60 * 1000ms)

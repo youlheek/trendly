@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>STOMP WebSocket Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.1.0/bundles/stomp.umd.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            font-size: 1rem;
+        }
+        #log {
+            background: black;
+            color: lime;
+            padding: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+<h2>🧪 STOMP WebSocket Tester</h2>
+
+<input id="url" placeholder="WebSocket URL (e.g. wss://your-server/ws)" />
+<input id="roomId" placeholder="Room ID (e.g. 123)" />
+<textarea id="message" rows="4" placeholder="Write a message..."></textarea>
+
+<button onclick="connect()">Connect & Subscribe</button>
+<button onclick="sendMessage()">Send Message</button>
+
+<div id="log">Logs will appear here...</div>
+
+<script>
+    let client = null;
+    const token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2IiwidG9rZW5fdHlwZSI6ImFjY2VzcyIsImlhdCI6MTc0MjgxODE3OCwiZXhwIjoxNzQyOTA0NTc4fQ.kyezoBLvReICt5p463FD56atbVz5u35RK2fEblvbL8M";
+
+    function log(msg) {
+        const logDiv = document.getElementById("log");
+        logDiv.textContent += `\n${msg}`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function connect() {
+        const url = document.getElementById("url").value;
+        const roomId = document.getElementById("roomId").value;
+        const subscribeTopic = `/topic/rooms/${roomId}`;
+
+        client = new StompJs.Client({
+            brokerURL: url,
+            connectHeaders: {
+                "Authorization": token
+            },
+            debug: (str) => log(`DEBUG: ${str}`),
+            onConnect: () => {
+                log(`✅ Connected to ${url}`);
+                client.subscribe(subscribeTopic, (message) => {
+                    log(`📩 Received: ${message.body}`);
+                });
+                log(`📡 Subscribed to ${subscribeTopic}`);
+            },
+            onStompError: (frame) => {
+                log(`❌ STOMP Error: ${frame.headers['message'] || frame.body}`);
+            },
+            onWebSocketError: (e) => {
+                log(`❌ WebSocket Error: ${e.message || 'Unknown error'}`);
+            },
+        });
+
+        client.activate();
+    }
+
+    function sendMessage() {
+        const roomId = document.getElementById("roomId").value;
+        const dest = `/app/rooms/${roomId}/message.send`;
+        const msg = document.getElementById("message").value;
+
+        if (client && client.connected) {
+            client.publish({ destination: dest, body: msg });
+            log(`📤 Sent to ${dest}: ${msg}`);
+            document.getElementById("message").value = '';
+        } else {
+            log("⚠️ Not connected!");
+        }
+    }
+</script>
+</body>
+</html>
